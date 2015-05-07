@@ -1,4 +1,8 @@
 __author__ = 'mqm'
 
 class WebDriverEngine:
-    pass
+
+    _sessions = []
+
+    def get_sessions(self):
+        return self._sessions
