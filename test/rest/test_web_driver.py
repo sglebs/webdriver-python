@@ -38,3 +38,14 @@ class TestRestWebDriver (unittest.TestCase, RestTester):
         jsonResult = self.expected_json()
         sessions = json.loads(jsonResult)
         self.assertEqual(0, len(sessions), "Initially there are no sessions")
+
+    def test_the_web_driver_can_inform_its_build_and_os_info (self):
+        self.reset_values_sent()
+        self.set_method("GET")
+        self.setURI("/status")
+        self.fetch_url()
+        self.assertEqual(self.statusCode(), 200, "Should be able to fetch the status")
+        jsonResult = self.expected_json()
+        status = json.loads(jsonResult)
+        self.assertIn("os", status, "There is OS information")
+        self.assertIn("build", status, "There is build information")
