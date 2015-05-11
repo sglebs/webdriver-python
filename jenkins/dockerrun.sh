@@ -1,2 +1,2 @@
 #!/bin/sh
-docker run -p 8080:8080 --name jenkins4python jenkins4python
+docker run -p 8080:8080 -d --name jenkins4python_c jenkins4python
