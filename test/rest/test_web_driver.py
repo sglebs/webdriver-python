@@ -32,7 +32,7 @@ class TestRestWebDriver (unittest.TestCase, RestTester):
     def test_initially_the_web_driver_has_no_sessions (self):
         self.reset_values_sent()
         self.set_method("GET")
-        self.setURI("/sessions")
+        self.setURI("/wd/hub/sessions")
         self.fetch_url()
         self.assertEqual(self.statusCode(), 200, "Should be able to fetch the sessions")
         jsonResult = self.expected_json()
@@ -42,7 +42,7 @@ class TestRestWebDriver (unittest.TestCase, RestTester):
     def test_the_web_driver_can_inform_its_build_and_os_info (self):
         self.reset_values_sent()
         self.set_method("GET")
-        self.setURI("/status")
+        self.setURI("/wd/hub/status")
         self.fetch_url()
         self.assertEqual(self.statusCode(), 200, "Should be able to fetch the status")
         jsonResult = self.expected_json()
