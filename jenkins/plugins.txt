@@ -8,5 +8,3 @@ violations:0.7.11
 sloccount:1.20
 xunit:1.94
 cobertura:1.9.7
-fitnesse:1.12
-findbugs:4.60
