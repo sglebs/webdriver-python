@@ -12,6 +12,9 @@ class WebDriverEngine:
     def get_sessions(self):
         return self._sessions
 
+    def get_session(self, session_id):
+        return self._sessions.get(session_id, None)
+
     def create_new_session(self, required_capabilities, desired_capabilities):
         new_session = Session(required_capabilities, desired_capabilities)
         session_id = datetime.datetime.utcnow().isoformat()

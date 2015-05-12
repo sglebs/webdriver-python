@@ -5,7 +5,7 @@ __author__ = 'mqm'
 
 class TestWebDriverEngine (unittest.TestCase):
 
-    def test_newly_created_engine_has_no_sessions (self):
+    def test_a_newly_created_engine_has_no_sessions (self):
         engine = WebDriverEngine()
         assert (len(engine.get_sessions()), 0, "A new engine has no seesions")
 
@@ -13,3 +13,9 @@ class TestWebDriverEngine (unittest.TestCase):
         engine = WebDriverEngine()
         [session_id, session] = engine.create_new_session({"foo": 5, "bar": 7}, {"fooz": 5, "barz": 7})
         assert (len(engine.get_sessions()), 1, "Engine created")
+
+    def test_it_is_possible_to_get_the_current_window_handle_of_a_session (self):
+        engine = WebDriverEngine()
+        [session_id, session] = engine.create_new_session({"foo": 5, "bar": 7}, {"fooz": 5, "barz": 7})
+        window_handle = session.get_current_window_handle()
+        self.assertGreater(window_handle, 0, "Window handle is a positive integer")

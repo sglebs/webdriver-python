@@ -27,3 +27,9 @@ class WebDriverController (Routeable):
         desired_capabilities = request.json and request.json.get("desiredCapabilities", {}) or {}
         [session_id, session] = self._web_driver_engine.create_new_session(required_capabilities, desired_capabilities)
         return {"sessionId": session_id, "status": 0, "value": desired_capabilities}
+
+    @route('/wd/hub/session/<session_id>/window_handle', method='GET')
+    def get_current_window_handle(self, session_id):
+        session = self._web_driver_engine.get_session(session_id)
+        current_window_handle = session.get_current_window_handle()
+        return {"sessionId": session_id, "status": 0, "value": current_window_handle}
