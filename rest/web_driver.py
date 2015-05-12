@@ -32,8 +32,17 @@ def get_current_window_handle(session_id):
     return {"sessionId": session_id, "status": 0, "value": current_window_handle}
 
 @post('/wd/hub/session/<session_id:int>/timeouts/async_script')
-def get_current_window_handle(session_id):
+def set_async_script_timeout(session_id):
     session = _web_driver_engine.get_session(session_id)
     timeout = request.json and request.json.get("ms", session.get_default_timeout()) or session.get_default_timeout()
     session.set_async_script_timeout(timeout)
     return {"sessionId": session_id, "status": 0, "value": timeout}
+
+@post('/wd/hub/session/<session_id:int>/timeouts')
+def set_timeouts(session_id):
+    session = _web_driver_engine.get_session(session_id)
+    timeout_type = request.json and request.json.get("type", "default") or "default"
+    timeout = request.json and request.json.get("ms", session.get_default_timeout()) or session.get_default_timeout()
+    session.set_timeout(timeout_type, timeout)
+    return {"sessionId": session_id, "status": 0, "value": timeout}
+
