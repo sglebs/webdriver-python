@@ -1,5 +1,5 @@
 import unittest
-from model.web_driver_engine import WebDriverEngine
+from model.web_driver import WebDriverEngine
 
 __author__ = 'mqm'
 

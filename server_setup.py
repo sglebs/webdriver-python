@@ -1,5 +1,5 @@
-from model.web_driver_engine import WebDriverEngine
-from rest.web_driver_controller import WebDriverController
+from model.web_driver import WebDriverEngine
+from rest.web_driver import WebDriverController
 
 # This is a non-OO controller. It has to be included so that Bottle will activate it
 import rest.heartbeat
