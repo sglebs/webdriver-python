@@ -1,5 +1,5 @@
 from session import Session
-import datetime
+import time
 
 __author__ = 'mqm'
 
@@ -17,7 +17,7 @@ class WebDriverEngine:
 
     def create_new_session(self, required_capabilities, desired_capabilities):
         new_session = Session(required_capabilities, desired_capabilities)
-        session_id = datetime.datetime.utcnow().isoformat()
+        session_id = (int) (time.time()*1000)
         self._sessions[session_id] = new_session
         self._sessions[session_id] = new_session
         return [session_id, new_session]

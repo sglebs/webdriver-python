@@ -74,7 +74,7 @@ class TestRestWebDriver (unittest.TestCase, RestTester):
         session_id = session["sessionId"]
         self.reset_values_sent()
         self.set_method("GET")
-        self.setURI("/wd/hub/session/%s/window_handle" % session_id)
+        self.setURI("/wd/hub/session/%i/window_handle" % session_id)
         self.fetch_url()
         self.assertEqual(self.statusCode(), 200, "Should be able to get a window handle")
         jsonResult = self.expected_json()
@@ -82,3 +82,17 @@ class TestRestWebDriver (unittest.TestCase, RestTester):
         session_value = session["value"]
         self.assertEqual(0, session_status, "Status of window handle fetching must be zero")
         self.assertGreater(session_value, 0, "Window handle is a positive integer")
+
+    def test_it_is_possible_to_set_the_async_script_timeout_of_a_session (self):
+        jsonResult = self._create_session()
+        session = json.loads(jsonResult)
+        session_id = session["sessionId"]
+        self.reset_values_sent()
+        self.set_method("POST")
+        self.setURI("/wd/hub/session/%i/timeouts/async_script" % session_id)
+        self.fetch_url()
+        self.assertEqual(self.statusCode(), 200, "Should be able to set the async script timeout")
+        jsonResult = self.expected_json()
+        session_status = session["status"]
+        session_value = session["value"]
+        self.assertEqual(0, session_status, "Status of timeout setting must be zero")
