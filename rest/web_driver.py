@@ -25,6 +25,11 @@ def create_session():
     [session_id, session] = _web_driver_engine.create_new_session(required_capabilities, desired_capabilities)
     return {"sessionId": session_id, "status": 0, "value": desired_capabilities}
 
+@delete('/wd/hub/session/<session_id:int>')
+def delete_session(session_id):
+    _web_driver_engine.delete_session(session_id)
+    return {"sessionId": session_id, "status": 0, "value": 0}
+
 @get('/wd/hub/session/<session_id:int>/window_handle')
 def get_current_window_handle(session_id):
     session = _web_driver_engine.get_session(session_id)

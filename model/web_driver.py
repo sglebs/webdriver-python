@@ -15,6 +15,9 @@ class WebDriverEngine:
     def get_session(self, session_id):
         return self._sessions.get(session_id, None)
 
+    def delete_session(self, session_id):
+        del self._sessions[session_id]
+
     def create_new_session(self, required_capabilities, desired_capabilities):
         new_session = Session(required_capabilities, desired_capabilities)
         session_id = (int) (time.time()*1000)
