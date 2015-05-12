@@ -1,8 +1,8 @@
 from model.web_driver_engine import WebDriverEngine
-from controllers.web_driver_controller import WebDriverController
+from rest.web_driver_controller import WebDriverController
 
 # This is a non-OO controller. It has to be included so that Bottle will activate it
-import controllers.heartbeat
+import rest.heartbeat
 
 def setup_server (application):
     application.installed_plugins = []
