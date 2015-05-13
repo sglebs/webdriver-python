@@ -1,8 +1,7 @@
 #from utils.bottlehelpers import get, post, route, Routeable
 from bottle import get, put, post, delete, route
-
 from bottle import request
-
+import execjs
 
 __author__ = 'mqm'
 
@@ -22,6 +21,7 @@ def get_active_sessions():
 def create_session():
     required_capabilities = request.json and request.json.get("requiredCapabilities", {}) or {}
     desired_capabilities = request.json and request.json.get("desiredCapabilities", {}) or {}
+    #desired_capabilities["javascriptEnabled"] = False # Can' do this. Xebium refuses. we are meant to drive a desktop app. No JS supported
     [session_id, session] = _web_driver_engine.create_new_session(required_capabilities, desired_capabilities)
     return {"sessionId": session_id, "status": 0, "value": desired_capabilities}
 
@@ -52,16 +52,34 @@ def set_timeouts(session_id):
     return {"sessionId": session_id, "status": 0, "value": timeout}
 
 @post('/wd/hub/session/<session_id:int>/url')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/url
-def set_timeouts(session_id):
+def open_url(session_id):
     session = _web_driver_engine.get_session(session_id)
     url_to_open = request.json and request.json.get("url", "/") or "/"
     open_result = session.open_url(url_to_open)
     return {"sessionId": session_id, "status": open_result, "value": url_to_open}
 
 @post('/wd/hub/session/<session_id:int>/element')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/element
-def set_timeouts(session_id):
+def find_element(session_id):
     session = _web_driver_engine.get_session(session_id)
-    id_to_verify = request.json and request.json.get("id", None) or None
-    is_id_present = False if id_to_verify is None else session.is_id_present(id_to_verify)
-    return {"sessionId": session_id, "status": 0, "value": {"ELEMENT": id_to_verify if is_id_present else None}}
+    lookup_method = request.json and request.json.get("using", "id") or "id"
+    value_of_locator = request.json and request.json.get("value", None) or None
+    is_id_present = False
+    if lookup_method == "id": # find element by id
+        is_id_present = session.is_id_present(value_of_locator)
+    return {"sessionId": session_id, "status": 0, "value": {"ELEMENT": str(value_of_locator) if is_id_present else None}}
+
+@get('/wd/hub/session/<session_id:int>/element/<element_name>/name')  # saw with protocol tracing
+def find_element_by_name(session_id,element_name):
+    session = _web_driver_engine.get_session(session_id)
+    element_name = element_name[1:] # the name comes with a + prefix
+    is_name_present = session.is_name_present(element_name)
+    return {"sessionId": session_id, "status": 0, "value": {"ELEMENT": str(element_name)}}
+
+#@post('/wd/hub/session/<session_id:int>/execute_async')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/execute_async
+@post('/wd/hub/session/<session_id:int>/execute')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/execute
+def execute_script(session_id):
+    session = _web_driver_engine.get_session(session_id)
+    script = request.json and request.json.get("script", "") or ""
+    eval = execjs.eval(script) #TODO: one JS VM per session, not a global one
+    return {"sessionId": session_id, "status": 0, "value": eval}
 

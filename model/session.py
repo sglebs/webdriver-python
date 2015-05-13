@@ -26,3 +26,6 @@ class Session:
     def is_id_present(self, id_to_verify):
         return True
 
+    def is_name_present(self, name_to_verify):
+        return True
+

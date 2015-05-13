@@ -17,9 +17,11 @@ six==1.8.0
 ssh==1.7.14
 wsgiref==0.1.2
 yolk==0.4.3
-Werkzeug==0.8.3
+Werkzeug==0.10.4
 Cython==0.21.1
 gevent==1.0.1
 bottle==0.12.8
 # for rest-testing a bottle app:
 bottle-werkzeug==0.1
+# JS integration
+PyExecJS==1.1.0
