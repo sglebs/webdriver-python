@@ -19,3 +19,6 @@ class Session:
 
     def set_timeout(self, timeout_type, timeout):
         self._timeouts[timeout_type]=timeout
+
+    def open_url(self, url_to_open):
+        return 0

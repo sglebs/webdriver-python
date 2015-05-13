@@ -51,3 +51,9 @@ def set_timeouts(session_id):
     session.set_timeout(timeout_type, timeout)
     return {"sessionId": session_id, "status": 0, "value": timeout}
 
+@post('/wd/hub/session/<session_id:int>/url')
+def set_timeouts(session_id):
+    session = _web_driver_engine.get_session(session_id)
+    url_to_open = request.json and request.json.get("url", "/") or "/"
+    open_result = session.open_url(url_to_open)
+    return {"sessionId": session_id, "status": open_result, "value": url_to_open}
