@@ -80,14 +80,14 @@ def find_element_by_name(session_id,element_name):
     is_name_present = session.is_name_present(element_name)
     return {"sessionId": session_id,
             "status": Success if is_name_present else NoSuchElement,
-            "value": {"ELEMENT": "%s" % element_name}}
+            "value": {"ELEMENT": "%s" % element_name if is_name_present else None}}
 
 #@post('/wd/hub/session/<session_id:int>/execute_async')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/execute_async
 @post('/wd/hub/session/<session_id:int>/execute')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/execute
 def execute_script(session_id):
     session = _web_driver_engine.get_session(session_id)
     script = request.json and request.json.get("script", "") or ""
-    eval_result = None
+    eval_result = ""
     # try:
     #     eval_result = execjs.eval(script) #TODO: one JS VM per session, not a global one
     # except SyntaxError:
