@@ -21,7 +21,7 @@ class Session:
         self._timeouts[timeout_type]=timeout
 
     def open_url(self, url_to_open):
-        return 0
+        return True
 
     def is_id_present(self, id_to_verify):
         return True
