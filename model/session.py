@@ -10,14 +10,22 @@ class Session:
         self._async_script_timeout = self.get_default_timeout()
         self._timeouts = {}
         self._bundle_id = desired_capabilities.get("bundleId", "")
-        atomac.launchAppByBundleId(self._bundle_id)
+        self._should_launch_app = desired_capabilities.get("shouldLaunch", True)
+        self._should_terminate_app = desired_capabilities.get("shouldTerminate", True)
+        if self._should_launch_app:
+            atomac.launchAppByBundleId(self._bundle_id)
         self._app = atomac.getAppRefByBundleId(self._bundle_id)
 
     def delete (self):
-        atomac.terminateAppByBundleId(self._bundle_id)
+        if self._should_terminate_app:
+            atomac.terminateAppByBundleId(self._bundle_id)
+
+    def get_window_handles(self):
+        windows = self._app.windows()
+        return [window.AXIdentifier for window in windows]
 
     def get_current_window_handle(self):
-        return 1
+        return self.get_window_handles()[0]
 
     def get_default_timeout(self):
         return 10000

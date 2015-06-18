@@ -37,6 +37,12 @@ def get_current_window_handle(session_id):
     current_window_handle = session.get_current_window_handle()
     return {"sessionId": session_id, "status": Success, "value": current_window_handle}
 
+@get('/wd/hub/session/<session_id:int>/window_handles') # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/window_handles
+def get_current_window_handles(session_id):
+    session = _web_driver_engine.get_session(session_id)
+    window_handles = session.get_window_handles()
+    return {"sessionId": session_id, "status": Success, "value": window_handles}
+
 @post('/wd/hub/session/<session_id:int>/timeouts/async_script')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/timeouts/async_script
 def set_async_script_timeout(session_id):
     session = _web_driver_engine.get_session(session_id)
