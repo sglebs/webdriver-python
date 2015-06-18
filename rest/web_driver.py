@@ -88,12 +88,12 @@ def execute_script(session_id):
     session = _web_driver_engine.get_session(session_id)
     script = request.json and request.json.get("script", "") or ""
     eval_result = ""
-    # try:
-    #     eval_result = execjs.eval(script) #TODO: one JS VM per session, not a global one
-    # except SyntaxError:
-    #     eval_result = None
-    # except RuntimeError, e:
-    #     eval_result = None
+    try:
+        eval_result = execjs.get("Node").eval(script) #TODO: one JS VM per session, not a global one
+    except SyntaxError:
+        eval_result = None
+    except RuntimeError, e:
+        eval_result = None
     return {"sessionId": session_id,
             "status": Success if eval_result is not None else JavaScriptError,
             "value": "%s" % eval_result if eval_result is not None else None}

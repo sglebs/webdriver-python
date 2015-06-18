@@ -1,5 +1,7 @@
 __author__ = 'mqm'
 
+import atomac
+
 class Session:
 
     def __init__(self, required_capabilities, desired_capabilities):
@@ -7,6 +9,12 @@ class Session:
         self._desired_capabilities = desired_capabilities
         self._async_script_timeout = self.get_default_timeout()
         self._timeouts = {}
+        self._bundle_id = desired_capabilities.get("bundleId", "")
+        atomac.launchAppByBundleId(self._bundle_id)
+        self._app = atomac.getAppRefByBundleId(self._bundle_id)
+
+    def delete (self):
+        atomac.terminateAppByBundleId(self._bundle_id)
 
     def get_current_window_handle(self):
         return 1
