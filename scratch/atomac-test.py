@@ -8,6 +8,10 @@ print window.getAttributes()
 print window.AXIdentifier
 sheet = window.sheets()[0]
 print sheet
+print sheet.AXIdentifier
+print sheet.buttons()
 close = sheet.buttons('Close')[0]
+print close
+print close.AXIdentifier
 print close.getActions()
 close.Press()
