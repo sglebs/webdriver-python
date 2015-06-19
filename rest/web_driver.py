@@ -114,9 +114,10 @@ def element_is_enabled(session_id, element_id):
 @post('/wd/hub/session/<session_id:int>/element/<element_id>/click')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/element/:id/click
 def click_element(session_id, element_id):
     session = _web_driver_engine.get_session(session_id)
+    clicked = session.click (element_id)
     return {"sessionId": session_id,
             "status": Success,
-            "value": True} #FIXME: check if it is really clicked
+            "value": clicked}
 
 
 @get('/wd/hub/session/<session_id:int>/element/<element_name>/name')  # saw with protocol tracing
@@ -131,7 +132,7 @@ def find_element_by_name(session_id,element_name):
 #@post('/wd/hub/session/<session_id:int>/execute_async')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/execute_async
 @post('/wd/hub/session/<session_id:int>/execute')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/execute
 def execute_script(session_id):
-    session = _web_driver_engine.get_session(session_id)
+    # session = _web_driver_engine.get_session(session_id)
     # script = request.json and request.json.get("script", "") or ""
     # eval_result = ""
     # try:
@@ -147,3 +148,14 @@ def execute_script(session_id):
             "status": Success,
             "value": None}
 
+
+@post('/wd/hub/session/<session_id:int>/frame')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/frame
+def select_frame (session_id):
+    # For MacOS, we pretend a Dialog (a sheet) is a Selenium frame. https://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/Sheets/Concepts/AboutSheets.html
+    session = _web_driver_engine.get_session(session_id)
+    value_of_locator = request.json and request.json.get("id", None) or None
+    is_id_present = False
+    selected_ok = session.select_frame_by_id(value_of_locator)
+    return {"sessionId": session_id,
+            "status": Success if selected_ok else NoSuchElement,
+            "value": {"ELEMENT": "%s" % value_of_locator if is_id_present else None}}
