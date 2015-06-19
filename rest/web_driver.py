@@ -90,12 +90,14 @@ def find_element(session_id):
     session = _web_driver_engine.get_session(session_id)
     lookup_method = request.json and request.json.get("using", "id") or "id"
     value_of_locator = request.json and request.json.get("value", None) or None
-    is_id_present = False
+    is_present = False
     if lookup_method == "id": # find element by id
-        is_id_present = session.is_id_present(value_of_locator)
+        is_present = session.is_id_present(value_of_locator)
+    elif lookup_method == "name": #find by name
+        is_present = session.is_name_present(value_of_locator)
     return {"sessionId": session_id,
-            "status": Success if is_id_present else NoSuchElement,
-            "value": {"ELEMENT": "%s" % value_of_locator if is_id_present else None}}
+            "status": Success if is_present else NoSuchElement,
+            "value": {"ELEMENT": "%s" % value_of_locator if is_present else None}}
 
 @get('/wd/hub/session/<session_id:int>/element/<element_id>/displayed')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/element/:id/displayed
 def element_is_displayed(session_id, element_id):

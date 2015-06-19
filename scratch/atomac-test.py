@@ -15,4 +15,6 @@ close = sheet.buttons('Close')[0]
 print close
 print close.AXIdentifier
 print close.getActions()
+print close.getAttributes()
+print close.AXTitle
 close.Press()

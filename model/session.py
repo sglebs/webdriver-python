@@ -55,8 +55,12 @@ class Session:
     def is_id_present(self, id_to_verify):
         return len(self._get_by_id(id_to_verify)) > 0
 
+    def _get_by_name (self, name_to_get):
+        # we test if the AXTitle attribute does exist first, or attempting to read it may cause an exception. That is why we short-cut with "and"
+        return [child for child in self._get_current_pane().AXChildren if "AXTitle" in child.getAttributes() and child._getAttribute("AXTitle") == name_to_get]
+
     def is_name_present(self, name_to_verify):
-        return True
+        return len(self._get_by_name(name_to_verify)) > 0
 
     def select_frame_by_id(self, id_to_verify):
         sheets = [sheet for sheet in self._get_current_window().sheets() if sheet.AXIdentifier == id_to_verify]
