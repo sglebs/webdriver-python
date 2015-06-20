@@ -11,8 +11,8 @@ class Session:
         self._async_script_timeout = self.get_default_timeout()
         self._timeouts = {}
         self._bundle_id = desired_capabilities.get("bundleId", "")
-        self._should_launch_app = desired_capabilities.get("shouldLaunch", True)
-        self._should_terminate_app = desired_capabilities.get("shouldTerminate", True)
+        self._should_launch_app = desired_capabilities.get("shouldLaunch", True) == True
+        self._should_terminate_app = desired_capabilities.get("shouldTerminate", True) == True
         self._current_frame = None
         if self._should_launch_app:
             atomac.launchAppByBundleId(self._bundle_id)
@@ -58,7 +58,10 @@ class Session:
             return self._get_current_pane().findAllR(AXIdentifier=id_to_get)
 
     def _get_first_by_id (self, id_to_get):
-        return self._get_all_by_id(id_to_get)[0]
+        if self._get_current_pane().AXIdentifier == id_to_get:
+            return [self._get_current_pane()]
+        else:
+            return self._get_current_pane().findFirstR(AXIdentifier=id_to_get)
 
     def is_id_present(self, id_to_verify):
         return len(self._get_all_by_id(id_to_verify)) > 0
@@ -67,16 +70,16 @@ class Session:
         if name_to_get == None or self._get_current_pane().AXIdentifier == name_to_get:
             return [self._get_current_pane()]
         else:
-            all_found = self._get_current_pane().findAllR(AXTitle=name_to_get)
-            if len(all_found) == 0:
-                all_found.extend(self._get_current_pane().findAllR(AXDescription=name_to_get))
-                return all_found
+            return self._get_current_pane().findAllR(AXDescription=name_to_get)
 
     def _get_all_ids_for_all_by_name (self, name_to_get):
         return [widget.AXIdentifier for widget in self._get_all_by_name(name_to_get)]
 
     def _get_first_by_name (self, name_to_get):
-        return self._get_all_by_name(name_to_get)[0]
+        if name_to_get == None or self._get_current_pane().AXIdentifier == name_to_get:
+            return self._get_current_pane()
+        else:
+            return self._get_current_pane().findFirstR(AXDescription=name_to_get)
 
     def is_name_present(self, name_to_verify):
         return len(self._get_all_by_name(name_to_verify)) > 0
