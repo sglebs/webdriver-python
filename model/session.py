@@ -1,6 +1,7 @@
 __author__ = 'mqm'
 
 import atomac
+import time
 
 class Session:
 
@@ -15,6 +16,7 @@ class Session:
         self._current_frame = None
         if self._should_launch_app:
             atomac.launchAppByBundleId(self._bundle_id)
+        time.sleep(1) #FIXME: wait until app up or timeout
         self._app = atomac.getAppRefByBundleId(self._bundle_id)
 
     def delete(self):
@@ -50,7 +52,10 @@ class Session:
             return self._get_current_window()
 
     def _get_by_id (self, id_to_get):
-        return [child for child in self._get_current_pane().AXChildren if child.AXIdentifier == id_to_get]
+        if self._get_current_pane().AXIdentifier == id_to_get:
+            return [self._get_current_pane()]
+        else:
+            return [child for child in self._get_current_pane().AXChildren if child.AXIdentifier == id_to_get]
 
     def is_id_present(self, id_to_verify):
         return len(self._get_by_id(id_to_verify)) > 0
@@ -77,3 +82,12 @@ class Session:
             return False
         elements[0].Press()
         return True
+
+    def get_element_tag_name (self, ui_element):
+        return ui_element.AXRole
+
+    def get_element_attrib_type(self, ui_element):
+        return ui_element.AXRoleDescription
+
+    def send_keys(self, ui_element, keys):
+        return ui_element.sendKeys(keys)

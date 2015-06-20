@@ -122,14 +122,14 @@ def click_element(session_id, element_id):
             "value": clicked}
 
 
-@get('/wd/hub/session/<session_id:int>/element/<element_name>/name')  # saw with protocol tracing
-def find_element_by_name(session_id,element_name):
+@get('/wd/hub/session/<session_id:int>/element/<element_id>/name')  # saw with protocol tracing
+def get_element_tag_name(session_id, element_id):
     session = _web_driver_engine.get_session(session_id)
-    element_name = element_name[1:] # the name comes with a + prefix
-    is_name_present = session.is_name_present(element_name)
+    elements = session._get_by_id(element_id)
+    element_tag_name = session.get_element_tag_name(elements[0])
     return {"sessionId": session_id,
-            "status": Success if is_name_present else NoSuchElement,
-            "value": {"ELEMENT": "%s" % element_name if is_name_present else None}}
+            "status": Success if element_tag_name is not None else NoSuchElement,
+            "value": "%s" % element_tag_name}
 
 #@post('/wd/hub/session/<session_id:int>/execute_async')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/execute_async
 @post('/wd/hub/session/<session_id:int>/execute')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/execute
@@ -156,8 +156,28 @@ def select_frame (session_id):
     # For MacOS, we pretend a Dialog (a sheet) is a Selenium frame. https://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/Sheets/Concepts/AboutSheets.html
     session = _web_driver_engine.get_session(session_id)
     value_of_locator = request.json and request.json.get("id", None) or None
-    is_id_present = False
     selected_ok = session.select_frame_by_id(value_of_locator)
     return {"sessionId": session_id,
             "status": Success if selected_ok else NoSuchElement,
-            "value": {"ELEMENT": "%s" % value_of_locator if is_id_present else None}}
+            "value": {"ELEMENT": "%s" % value_of_locator if selected_ok else None}}
+
+@get('/wd/hub/session/<session_id:int>/element/<element_id>/attribute/type')  # saw with protocol tracing
+def find_element_by_name(session_id, element_id):
+    session = _web_driver_engine.get_session(session_id)
+    elements = session._get_by_id(element_id)
+    element_attrib_type = session.get_element_attrib_type(elements[0])
+    return {"sessionId": session_id,
+            "status": Success if element_attrib_type is not None else NoSuchElement,
+            "value": "%s" % element_attrib_type}
+
+@post('/wd/hub/session/<session_id:int>/element/<element_id>/value')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/element/:id/value
+def send_keystrokes(session_id, element_id):
+    session = _web_driver_engine.get_session(session_id)
+    keys_list = request.json and request.json.get("value", None) or None
+    elements = session._get_by_id(element_id)
+    for keys in keys_list:
+        session.send_keys(elements[0], keys)
+    return {"sessionId": session_id,
+            "status": Success if len(elements)>0 else NoSuchElement,
+            "value": True}
+
