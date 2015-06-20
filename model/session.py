@@ -51,17 +51,20 @@ class Session:
         else:
             return self._get_current_window()
 
-    def _get_by_id (self, id_to_get):
+    def _get_all_by_id (self, id_to_get):
         if self._get_current_pane().AXIdentifier == id_to_get:
             return [self._get_current_pane()]
         else:
             return self._get_current_pane().findAllR(AXIdentifier=id_to_get)
 
-    def is_id_present(self, id_to_verify):
-        return len(self._get_by_id(id_to_verify)) > 0
+    def _get_first_by_id (self, id_to_get):
+        return self._get_all_by_id(id_to_get)[0]
 
-    def _get_by_name (self, name_to_get):
-        if self._get_current_pane().AXIdentifier == name_to_get:
+    def is_id_present(self, id_to_verify):
+        return len(self._get_all_by_id(id_to_verify)) > 0
+
+    def _get_all_by_name (self, name_to_get):
+        if name_to_get == None or self._get_current_pane().AXIdentifier == name_to_get:
             return [self._get_current_pane()]
         else:
             all_found = self._get_current_pane().findAllR(AXTitle=name_to_get)
@@ -69,8 +72,14 @@ class Session:
                 all_found.extend(self._get_current_pane().findAllR(AXDescription=name_to_get))
                 return all_found
 
+    def _get_all_ids_for_all_by_name (self, name_to_get):
+        return [widget.AXIdentifier for widget in self._get_all_by_name(name_to_get)]
+
+    def _get_first_by_name (self, name_to_get):
+        return self._get_all_by_name(name_to_get)[0]
+
     def is_name_present(self, name_to_verify):
-        return len(self._get_by_name(name_to_verify)) > 0
+        return len(self._get_all_by_name(name_to_verify)) > 0
 
     def select_frame_by_id(self, id_to_verify):
         sheets = [sheet for sheet in self._get_current_window().sheets() if sheet.AXIdentifier == id_to_verify]
@@ -82,7 +91,7 @@ class Session:
             return False
 
     def click(self, id_to_click):
-        elements = self._get_by_id(id_to_click)
+        elements = self._get_all_by_id(id_to_click)
         if len(elements) == 0:
             return False
         elements[0].Press()

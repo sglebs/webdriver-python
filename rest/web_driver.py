@@ -94,10 +94,10 @@ def find_element(session_id):
     if lookup_method == "id": # find element by id
         is_present = session.is_id_present(value_of_locator)
     elif lookup_method == "name": #find by name
-        by_name = session._get_by_name(value_of_locator)
-        if len(by_name)>0 :
+        all_ids = session._get_all_ids_for_all_by_name(value_of_locator)
+        if len(all_ids)>0 :
             is_present = True
-            value_of_locator = by_name[0].AXIdentifier
+            value_of_locator = all_ids[0]
     return {"sessionId": session_id,
             "status": Success if is_present else NoSuchElement,
             "value": {"ELEMENT": "%s" % value_of_locator if is_present else None}}
@@ -105,8 +105,8 @@ def find_element(session_id):
 @get('/wd/hub/session/<session_id:int>/element/<element_id>/displayed')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/element/:id/displayed
 def element_is_displayed(session_id, element_id):
     session = _web_driver_engine.get_session(session_id)
-    elements = session._get_by_id(element_id)
-    is_displayed = session.is_element_displayed(elements[0])
+    elements = session._get_all_by_id(element_id)
+    is_displayed = session.is_element_displayed(elements[0]) if len(elements)>0 else False
     return {"sessionId": session_id,
             "status": Success,
             "value": is_displayed}
@@ -114,8 +114,8 @@ def element_is_displayed(session_id, element_id):
 @get('/wd/hub/session/<session_id:int>/element/<element_id>/enabled')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/element/:id/enabled
 def element_is_enabled(session_id, element_id):
     session = _web_driver_engine.get_session(session_id)
-    elements = session._get_by_id(element_id)
-    is_enabled = session.is_element_enabled(elements[0])
+    elements = session._get_all_by_id(element_id)
+    is_enabled = session.is_element_enabled(elements[0]) if len(elements)>0 else False
     return {"sessionId": session_id,
             "status": Success,
             "value": is_enabled}
@@ -132,8 +132,8 @@ def click_element(session_id, element_id):
 @get('/wd/hub/session/<session_id:int>/element/<element_id>/name')  # saw with protocol tracing
 def get_element_tag_name(session_id, element_id):
     session = _web_driver_engine.get_session(session_id)
-    elements = session._get_by_id(element_id)
-    element_tag_name = session.get_element_tag_name(elements[0])
+    elements = session._get_all_by_id(element_id)
+    element_tag_name = session.get_element_tag_name(elements[0]) if len(elements)>0 else None
     return {"sessionId": session_id,
             "status": Success if element_tag_name is not None else NoSuchElement,
             "value": "%s" % element_tag_name}
@@ -171,8 +171,8 @@ def select_frame (session_id):
 @get('/wd/hub/session/<session_id:int>/element/<element_id>/attribute/type')  # saw with protocol tracing
 def find_element_by_name(session_id, element_id):
     session = _web_driver_engine.get_session(session_id)
-    elements = session._get_by_id(element_id)
-    element_attrib_type = session.get_element_attrib_type(elements[0])
+    elements = session._get_all_by_id(element_id)
+    element_attrib_type = session.get_element_attrib_type(elements[0]) if len(elements)>0 else None
     return {"sessionId": session_id,
             "status": Success if element_attrib_type is not None else NoSuchElement,
             "value": "%s" % element_attrib_type}
@@ -181,7 +181,7 @@ def find_element_by_name(session_id, element_id):
 def send_keystrokes(session_id, element_id):
     session = _web_driver_engine.get_session(session_id)
     keys_list = request.json and request.json.get("value", None) or None
-    elements = session._get_by_id(element_id)
+    elements = session._get_all_by_id(element_id)
     for keys in keys_list:
         session.send_keys(elements[0], keys)
     return {"sessionId": session_id,
