@@ -94,7 +94,10 @@ def find_element(session_id):
     if lookup_method == "id": # find element by id
         is_present = session.is_id_present(value_of_locator)
     elif lookup_method == "name": #find by name
-        is_present = session.is_name_present(value_of_locator)
+        by_name = session._get_by_name(value_of_locator)
+        if len(by_name)>0 :
+            is_present = True
+            value_of_locator = by_name[0].AXIdentifier
     return {"sessionId": session_id,
             "status": Success if is_present else NoSuchElement,
             "value": {"ELEMENT": "%s" % value_of_locator if is_present else None}}
@@ -122,7 +125,7 @@ def click_element(session_id, element_id):
     session = _web_driver_engine.get_session(session_id)
     clicked = session.click (element_id)
     return {"sessionId": session_id,
-            "status": Success,
+            "status": Success if clicked is not None else NoSuchElement,
             "value": clicked}
 
 

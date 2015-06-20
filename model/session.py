@@ -64,7 +64,10 @@ class Session:
         if self._get_current_pane().AXIdentifier == name_to_get:
             return [self._get_current_pane()]
         else:
-            return self._get_current_pane().findAllR(AXTitle=name_to_get)
+            all_found = self._get_current_pane().findAllR(AXTitle=name_to_get)
+            if len(all_found) == 0:
+                all_found.extend(self._get_current_pane().findAllR(AXDescription=name_to_get))
+                return all_found
 
     def is_name_present(self, name_to_verify):
         return len(self._get_by_name(name_to_verify)) > 0
