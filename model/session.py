@@ -55,14 +55,16 @@ class Session:
         if self._get_current_pane().AXIdentifier == id_to_get:
             return [self._get_current_pane()]
         else:
-            return [child for child in self._get_current_pane().AXChildren if child.AXIdentifier == id_to_get]
+            return self._get_current_pane().findAllR(AXIdentifier=id_to_get)
 
     def is_id_present(self, id_to_verify):
         return len(self._get_by_id(id_to_verify)) > 0
 
     def _get_by_name (self, name_to_get):
-        # we test if the AXTitle attribute does exist first, or attempting to read it may cause an exception. That is why we short-cut with "and"
-        return [child for child in self._get_current_pane().AXChildren if "AXTitle" in child.getAttributes() and child._getAttribute("AXTitle") == name_to_get]
+        if self._get_current_pane().AXIdentifier == name_to_get:
+            return [self._get_current_pane()]
+        else:
+            return self._get_current_pane().findAllR(AXTitle=name_to_get)
 
     def is_name_present(self, name_to_verify):
         return len(self._get_by_name(name_to_verify)) > 0
@@ -91,3 +93,17 @@ class Session:
 
     def send_keys(self, ui_element, keys):
         return ui_element.sendKeys(keys)
+
+    def is_element_displayed(self, ui_element):
+        if "AXEnabled" in ui_element.getAttributes():
+            return ui_element.AXEnabled == "1"
+        else:
+            return True
+
+    def is_element_enabled(self, ui_element):
+        if "AXEnabled" in ui_element.getAttributes():
+            return ui_element.AXEnabled == "1"
+        else:
+            return True
+
+

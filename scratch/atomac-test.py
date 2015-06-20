@@ -4,6 +4,7 @@ atomac.launchAppByBundleId('com.apple.calculator')
 calc = atomac.getAppRefByBundleId('com.apple.calculator')
 time.sleep(2)
 window = calc.windows()[0]
+
 print window
 print window.AXTitle
 print window.getAttributes()
@@ -12,8 +13,8 @@ print window.AXIdentifier
 print window.AXChildren
 print window.buttons()
 window.sendKeys ("234*2")
-
-
+widget = window.findFirstR(AXIdentifier='_NS:98')
+print widget
 
 # atomac.launchAppByBundleId('com.apple.Automator')
 # automator = atomac.getAppRefByBundleId('com.apple.Automator')

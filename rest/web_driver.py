@@ -102,16 +102,20 @@ def find_element(session_id):
 @get('/wd/hub/session/<session_id:int>/element/<element_id>/displayed')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/element/:id/displayed
 def element_is_displayed(session_id, element_id):
     session = _web_driver_engine.get_session(session_id)
+    elements = session._get_by_id(element_id)
+    is_displayed = session.is_element_displayed(elements[0])
     return {"sessionId": session_id,
             "status": Success,
-            "value": True} #FIXME: check if it is really visible
+            "value": is_displayed}
 
 @get('/wd/hub/session/<session_id:int>/element/<element_id>/enabled')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/element/:id/enabled
 def element_is_enabled(session_id, element_id):
     session = _web_driver_engine.get_session(session_id)
+    elements = session._get_by_id(element_id)
+    is_enabled = session.is_element_enabled(elements[0])
     return {"sessionId": session_id,
             "status": Success,
-            "value": True} #FIXME: really click
+            "value": is_enabled}
 
 @post('/wd/hub/session/<session_id:int>/element/<element_id>/click')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/element/:id/click
 def click_element(session_id, element_id):
