@@ -78,6 +78,7 @@ def find_elements(session_id):
     session = _web_driver_engine.get_session(session_id)
     lookup_method = request.json and request.json.get("using", "id") or "id"
     value_of_locator = request.json and request.json.get("value", None) or None
+    value_of_locator = urllib.unquote_plus (value_of_locator) #just in case it is an "escaped xpath id" by us
     is_id_present = False
     if lookup_method == "id": # find element by id
         is_id_present = session.is_id_present(value_of_locator)
@@ -100,7 +101,7 @@ def find_element(session_id):
         all_ids = session._get_all_ids_for_all_by_name(value_of_locator)
         if len(all_ids)>0 :
             is_present = True
-            value_of_locator = all_ids[0]
+            value_of_locator = urllib.quote_plus (all_ids[0]) #escape xpath id
     return {"sessionId": session_id,
             "status": Success if is_present else NoSuchElement,
             "value": {"ELEMENT": "%s" % value_of_locator if is_present else None}}
@@ -108,6 +109,7 @@ def find_element(session_id):
 @get('/wd/hub/session/<session_id:int>/element/<element_id>/displayed')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/element/:id/displayed
 def element_is_displayed(session_id, element_id):
     session = _web_driver_engine.get_session(session_id)
+    element_id = urllib.unquote_plus(element_id) #just in case it is an "escaped xpath id" by us
     elements = session._get_all_by_id(element_id)
     is_displayed = session.is_element_displayed(elements[0]) if len(elements)>0 else False
     return {"sessionId": session_id,
@@ -117,6 +119,7 @@ def element_is_displayed(session_id, element_id):
 @get('/wd/hub/session/<session_id:int>/element/<element_id>/enabled')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/element/:id/enabled
 def element_is_enabled(session_id, element_id):
     session = _web_driver_engine.get_session(session_id)
+    element_id = urllib.unquote_plus(element_id) #just in case it is an "escaped xpath id" by us
     elements = session._get_all_by_id(element_id)
     is_enabled = session.is_element_enabled(elements[0]) if len(elements)>0 else False
     return {"sessionId": session_id,
@@ -136,6 +139,7 @@ def click_element(session_id, element_id):
 @get('/wd/hub/session/<session_id:int>/element/<element_id>/name')  # saw with protocol tracing
 def get_element_tag_name(session_id, element_id):
     session = _web_driver_engine.get_session(session_id)
+    element_id = urllib.unquote_plus(element_id) #just in case it is an "escaped xpath id" by us
     elements = session._get_all_by_id(element_id)
     element_tag_name = session.get_element_tag_name(elements[0]) if len(elements)>0 else None
     return {"sessionId": session_id,
@@ -175,6 +179,7 @@ def select_frame (session_id):
 @get('/wd/hub/session/<session_id:int>/element/<element_id>/attribute/type')  # saw with protocol tracing
 def find_element_by_name(session_id, element_id):
     session = _web_driver_engine.get_session(session_id)
+    element_id = urllib.unquote_plus(element_id) #just in case it is an "escaped xpath id" by us
     elements = session._get_all_by_id(element_id)
     element_attrib_type = session.get_element_attrib_type(elements[0]) if len(elements)>0 else None
     return {"sessionId": session_id,
@@ -184,6 +189,7 @@ def find_element_by_name(session_id, element_id):
 @post('/wd/hub/session/<session_id:int>/element/<element_id>/value')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/element/:id/value
 def send_keystrokes(session_id, element_id):
     session = _web_driver_engine.get_session(session_id)
+    element_id = urllib.unquote_plus(element_id) #just in case it is an "escaped xpath id" by us
     keys_list = request.json and request.json.get("value", None) or None
     elements = session._get_all_by_id(element_id)
     for keys in keys_list:

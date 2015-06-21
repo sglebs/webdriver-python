@@ -55,7 +55,7 @@ class Session:
     def _get_all_by_id (self, id_to_get):
         if self._get_current_pane().AXIdentifier == id_to_get:
             return [self._get_current_pane()]
-        elif id_to_get.find('/'): #xpath
+        elif "/" in id_to_get: #xpath
             return self._locate_with_xpath(id_to_get)
         else:
             return self._get_current_pane().findAllR(AXIdentifier=id_to_get)
@@ -69,13 +69,13 @@ class Session:
             return self._get_current_pane().findFirstR(AXIdentifier=id_to_get)
 
     def is_id_present(self, id_to_verify):
-        if id_to_verify.find('/'):
+        if "/" in id_to_verify:
             return len(self._locate_with_xpath(id_to_verify)) > 0
         else:
             return len(self._get_all_by_id(id_to_verify)) > 0
 
     def _get_all_by_name (self, name_to_get):
-        if name_to_get == None or self._get_current_pane().AXIdentifier == name_to_get:
+        if name_to_get == None or name_to_get == "#" or self._get_current_pane().AXIdentifier == name_to_get:
             return [self._get_current_pane()]
         else:
             return self._get_current_pane().findAllR(AXDescription=name_to_get)
