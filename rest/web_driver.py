@@ -3,6 +3,7 @@ from bottle import get, put, post, delete, route
 from bottle import request
 import execjs
 from error_codes import *
+import urllib
 
 __author__ = 'mqm'
 
@@ -90,9 +91,11 @@ def find_element(session_id):
     session = _web_driver_engine.get_session(session_id)
     lookup_method = request.json and request.json.get("using", "id") or "id"
     value_of_locator = request.json and request.json.get("value", None) or None
+    value_of_locator = urllib.unquote_plus (value_of_locator) #just in case it is an "escaped xpath id" by us
     is_present = False
     if lookup_method == "id": # find element by id
         is_present = session.is_id_present(value_of_locator)
+        value_of_locator = urllib.quote_plus (value_of_locator) #escape xpath id
     elif lookup_method == "name": #find by name
         all_ids = session._get_all_ids_for_all_by_name(value_of_locator)
         if len(all_ids)>0 :
@@ -123,6 +126,7 @@ def element_is_enabled(session_id, element_id):
 @post('/wd/hub/session/<session_id:int>/element/<element_id>/click')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/element/:id/click
 def click_element(session_id, element_id):
     session = _web_driver_engine.get_session(session_id)
+    element_id = urllib.unquote_plus(element_id) #just in case it is an "escaped xpath id" by us
     clicked = session.click (element_id)
     return {"sessionId": session_id,
             "status": Success if clicked is not None else NoSuchElement,

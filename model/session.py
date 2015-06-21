@@ -2,6 +2,7 @@ __author__ = 'mqm'
 
 import atomac
 import time
+import re
 
 class Session:
 
@@ -54,17 +55,24 @@ class Session:
     def _get_all_by_id (self, id_to_get):
         if self._get_current_pane().AXIdentifier == id_to_get:
             return [self._get_current_pane()]
+        elif id_to_get.find('/'): #xpath
+            return self._locate_with_xpath(id_to_get)
         else:
             return self._get_current_pane().findAllR(AXIdentifier=id_to_get)
 
     def _get_first_by_id (self, id_to_get):
         if self._get_current_pane().AXIdentifier == id_to_get:
             return [self._get_current_pane()]
+        elif id_to_get.find('/'): #xpath
+            return self._locate_with_xpath(id_to_get)[0]
         else:
             return self._get_current_pane().findFirstR(AXIdentifier=id_to_get)
 
     def is_id_present(self, id_to_verify):
-        return len(self._get_all_by_id(id_to_verify)) > 0
+        if id_to_verify.find('/'):
+            return len(self._locate_with_xpath(id_to_verify)) > 0
+        else:
+            return len(self._get_all_by_id(id_to_verify)) > 0
 
     def _get_all_by_name (self, name_to_get):
         if name_to_get == None or self._get_current_pane().AXIdentifier == name_to_get:
@@ -121,4 +129,26 @@ class Session:
         else:
             return True
 
-
+    def _locate_with_xpath (self, xpath_expression):
+        parts = xpath_expression.split('/')
+        current_node = self._get_current_pane()
+        for part in parts:
+            search_result_like_array = re.search('(\w+)[[]?(\d+)[]]?', part)
+            search_result_like_property= re.search('(\w+)[[]?(\w+)=([^]]+)[]]?', part)
+            if search_result_like_array is not None:
+                role = search_result_like_array.group(1)
+                index = int(search_result_like_array.group(2))
+                current_node = current_node.findAll(AXRole=role)[index-1]
+            elif search_result_like_property is not None:
+                role = search_result_like_property.group(1)
+                prop_name = search_result_like_property.group(2)
+                prop_value = search_result_like_property.group(3)
+                if prop_name == "name":
+                    current_node = current_node.findFirst(AXRole=role, AXDescription=prop_value)
+                elif prop_name == "id":
+                    current_node = current_node.findFirst(AXRole=role, AXIdentifier=prop_value)
+                else:
+                    current_node = current_node.findFirst(AXRole=part)
+            else:
+                current_node = current_node.findFirst(AXRole=part)
+        return [current_node] if current_node is not None else []
