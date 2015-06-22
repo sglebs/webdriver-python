@@ -115,7 +115,11 @@ class Session:
         return ui_element.AXRoleDescription
 
     def send_keys(self, ui_element, keys):
-        return ui_element.sendKeys(keys)
+        if ui_element.AXRole == "AXTextField":
+            ui_element.AXValue = ui_element.AXValue + keys # FIXME: find a way to sendKeys to the widget. we use a workaround
+            return True
+        else:
+            return ui_element.sendKeys(keys) #FIXME: in atomac, sendKeys is global, not to the widget :-(
 
     def is_element_displayed(self, ui_element):
         if "AXEnabled" in ui_element.getAttributes():
@@ -133,6 +137,9 @@ class Session:
         parts = xpath_expression.split('/')
         current_node = self._get_current_pane()
         for part in parts:
+            if part == "":
+                current_node = self._app #topmost root if xpath starts with /
+                continue
             search_result_like_array = re.search('(\w+)[[]?(\d+)[]]?', part)
             search_result_like_property= re.search('(\w+)[[]?(\w+)=([^]]+)[]]?', part)
             if search_result_like_array is not None:
@@ -147,6 +154,8 @@ class Session:
                     current_node = current_node.findFirst(AXRole=role, AXDescription=prop_value)
                 elif prop_name == "id":
                     current_node = current_node.findFirst(AXRole=role, AXIdentifier=prop_value)
+                elif prop_name == "title":
+                    current_node = current_node.findFirst(AXRole=role, AXTitle=prop_value)
                 else:
                     current_node = current_node.findFirst(AXRole=part)
             else:
