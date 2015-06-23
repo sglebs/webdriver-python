@@ -3,6 +3,7 @@ __author__ = 'mqm'
 import atomac
 import time
 import re
+import pyscreeze
 
 class Session:
 
@@ -161,3 +162,8 @@ class Session:
             else:
                 current_node = current_node.findFirst(AXRole=part)
         return [current_node] if current_node is not None else []
+
+    def take_screenshot(self):
+        pane = self._get_current_pane()
+        rect = [pane.AXPosition[0], pane.AXPosition[1], pane.AXSize[0], pane.AXSize[1]]
+        return pyscreeze.screenshot(region=rect)

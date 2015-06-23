@@ -4,6 +4,8 @@ from bottle import request
 import execjs
 from error_codes import *
 import urllib
+from base64 import b64encode
+from StringIO import StringIO
 
 __author__ = 'mqm'
 
@@ -84,7 +86,7 @@ def find_elements(session_id):
         is_id_present = session.is_id_present(value_of_locator)
         if is_id_present:
             return {"sessionId": session_id, "status": Success, "value": [{"ELEMENT": "%s" % value_of_locator}]}
-    #FIXME: others strategies of finding (not just id)
+    #FIXME: other strategies of finding (not just id)
     return {"sessionId": session_id, "status": NoSuchElement, "value": []}
 
 @post('/wd/hub/session/<session_id:int>/element')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/element
@@ -198,3 +200,15 @@ def send_keystrokes(session_id, element_id):
             "status": Success if len(elements)>0 else NoSuchElement,
             "value": True}
 
+@get('/wd/hub/session/<session_id:int>/screenshot')  #https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/screenshot
+def take_screenshot (session_id):
+    session = _web_driver_engine.get_session(session_id)
+    screenshot = session.take_screenshot()
+    screenshot.load() # otherwise, lazy and no bytes in memory, broken img
+    buffer_in_memory = StringIO()
+    screenshot.save(buffer_in_memory, 'PNG')
+    buffer_in_memory.seek(0)
+    base_64 = b64encode(buffer_in_memory.getvalue())
+    return {"sessionId": session_id,
+            "status": Success if base_64 else NoSuchWindow,
+            "value": base_64}
