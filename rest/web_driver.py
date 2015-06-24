@@ -224,7 +224,17 @@ def take_screenshot (session_id):
             "value": base_64}
 
 @delete('/wd/hub/session/<session_id:int>/window') # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/window
-def get_current_window_handle(session_id):
+def delete_current_window_handle(session_id):
     session = _web_driver_engine.get_session(session_id)
     session.close_current_window()
     return {"sessionId": session_id, "status": Success, "value": True}
+
+@post('/wd/hub/session/<session_id:int>/element/<element_id>/clear')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/element/:id/clear
+def element_clear(session_id, element_id):
+    session = _web_driver_engine.get_session(session_id)
+    element_id = urllib.unquote_plus(element_id) #just in case it is an "escaped xpath id" by us
+    elements = session.get_all_by_id(element_id)
+    #FIXME: erase element' text
+    return {"sessionId": session_id,
+            "status": Success,
+            "value": True}
