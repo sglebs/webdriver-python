@@ -153,6 +153,8 @@ class Session:
         parts = xpath_expression.split('/')
         current_node = self._get_current_pane()
         for part in parts:
+            if current_node is None:
+                break
             if part == "":
                 current_node = self._app #topmost root if xpath starts with /
                 continue
@@ -188,3 +190,6 @@ class Session:
         pane = self._get_current_pane()
         rect = [pane.AXPosition[0], pane.AXPosition[1], pane.AXSize[0], pane.AXSize[1]]
         return pyscreeze.screenshot(region=rect)
+
+    def close_current_window(self):
+        return self._get_current_pane().AXCloseButton.Press()

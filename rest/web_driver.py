@@ -222,3 +222,9 @@ def take_screenshot (session_id):
     return {"sessionId": session_id,
             "status": Success if base_64 else NoSuchWindow,
             "value": base_64}
+
+@delete('/wd/hub/session/<session_id:int>/window') # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/window
+def get_current_window_handle(session_id):
+    session = _web_driver_engine.get_session(session_id)
+    session.close_current_window()
+    return {"sessionId": session_id, "status": Success, "value": True}
