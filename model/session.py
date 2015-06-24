@@ -20,6 +20,8 @@ class Session:
             atomac.launchAppByBundleId(self._bundle_id)
         time.sleep(1) #FIXME: wait until app up or timeout
         self._app = atomac.getAppRefByBundleId(self._bundle_id)
+        self._cache_of_elements_by_id = {} #FIXME: need to limit the cache and also purge on new windows etc
+        self._cache_of_element_ids_by_element_name = {} #FIXME: need to limit the cache and also purge on new windows etc
 
     def delete(self):
         if self._should_terminate_app:
@@ -57,32 +59,45 @@ class Session:
         if self._get_current_pane().AXIdentifier == id_to_get:
             return [self._get_current_pane()]
         elif "/" in id_to_get: #xpath
-            return self._locate_with_xpath(id_to_get)
+            return self._locate_nodes_with_xpath(id_to_get)
         else:
             return self._get_current_pane().findAllR(AXIdentifier=id_to_get)
+
+    def get_all_by_id (self, id_to_get):
+        cached = self._cache_of_elements_by_id.get(id_to_get, None)
+        if not cached:
+            cached = self._get_all_by_id(id_to_get)
+            self._cache_of_elements_by_id[id_to_get] = cached
+        return cached
+
 
     def _get_first_by_id (self, id_to_get):
         if self._get_current_pane().AXIdentifier == id_to_get:
             return [self._get_current_pane()]
         elif id_to_get.find('/'): #xpath
-            return self._locate_with_xpath(id_to_get)[0]
+            return self._locate_nodes_with_xpath(id_to_get)[0]
         else:
             return self._get_current_pane().findFirstR(AXIdentifier=id_to_get)
 
     def is_id_present(self, id_to_verify):
         if "/" in id_to_verify:
-            return len(self._locate_with_xpath(id_to_verify)) > 0
+            return len(self._locate_nodes_with_xpath(id_to_verify)) > 0
         else:
-            return len(self._get_all_by_id(id_to_verify)) > 0
+            return len(self.get_all_by_id(id_to_verify)) > 0
 
-    def _get_all_by_name (self, name_to_get):
+    def _get_all_nodes_by_name (self, name_to_get):
         if name_to_get == None or name_to_get == "#" or self._get_current_pane().AXIdentifier == name_to_get:
             return [self._get_current_pane()]
         else:
             return self._get_current_pane().findAllR(AXDescription=name_to_get)
 
-    def _get_all_ids_for_all_by_name (self, name_to_get):
-        return [widget.AXIdentifier for widget in self._get_all_by_name(name_to_get)]
+    def get_all_ids_for_all_by_name (self, name_to_get):
+        cached_ids = self._cache_of_element_ids_by_element_name.get(name_to_get, None)
+        if not cached_ids:
+            nodes = [widget for widget in self._get_all_nodes_by_name(name_to_get)]
+            cached_ids = [widget.AXIdentifier for widget in nodes]
+            self._cache_of_element_ids_by_element_name[name_to_get] = cached_ids
+        return cached_ids
 
     def _get_first_by_name (self, name_to_get):
         if name_to_get == None or self._get_current_pane().AXIdentifier == name_to_get:
@@ -91,7 +106,7 @@ class Session:
             return self._get_current_pane().findFirstR(AXDescription=name_to_get)
 
     def is_name_present(self, name_to_verify):
-        return len(self._get_all_by_name(name_to_verify)) > 0
+        return len(self._get_all_nodes_by_name(name_to_verify)) > 0
 
     def select_frame_by_id(self, id_to_verify):
         sheets = [sheet for sheet in self._get_current_window().sheets() if sheet.AXIdentifier == id_to_verify]
@@ -103,7 +118,7 @@ class Session:
             return False
 
     def click(self, id_to_click):
-        elements = self._get_all_by_id(id_to_click)
+        elements = self.get_all_by_id(id_to_click)
         if len(elements) == 0:
             return False
         elements[0].Press()
@@ -134,7 +149,7 @@ class Session:
         else:
             return True
 
-    def _locate_with_xpath (self, xpath_expression):
+    def _locate_nodes_with_xpath (self, xpath_expression):
         parts = xpath_expression.split('/')
         current_node = self._get_current_pane()
         for part in parts:
@@ -162,6 +177,12 @@ class Session:
             else:
                 current_node = current_node.findFirst(AXRole=part)
         return [current_node] if current_node is not None else []
+
+    def locate_with_xpath (self, xpath_expression):
+        elements = [element for element in self._locate_nodes_with_xpath(xpath_expression)]
+        for element in elements: #cache all IDs which we found by xpath, for speed in subsequent calls - atomac is very slow to find by id recursively
+            self._cache_of_elements_by_id[element.AXIdentifier] = [element] #FIXME: our API is sometimes based on collections
+        return [element.AXIdentifier for element in elements]
 
     def take_screenshot(self):
         pane = self._get_current_pane()

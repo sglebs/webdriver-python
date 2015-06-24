@@ -81,13 +81,18 @@ def find_elements(session_id):
     lookup_method = request.json and request.json.get("using", "id") or "id"
     value_of_locator = request.json and request.json.get("value", None) or None
     value_of_locator = urllib.unquote_plus (value_of_locator) #just in case it is an "escaped xpath id" by us
-    is_id_present = False
+    element_locators = []
     if lookup_method == "id": # find element by id
-        is_id_present = session.is_id_present(value_of_locator)
-        if is_id_present:
-            return {"sessionId": session_id, "status": Success, "value": [{"ELEMENT": "%s" % value_of_locator}]}
-    #FIXME: other strategies of finding (not just id)
-    return {"sessionId": session_id, "status": NoSuchElement, "value": []}
+        element_locators.extend (urllib.quote_plus (value_of_locator)) #escape xpath id
+    elif lookup_method == "name": #find by name
+        all_ids = session.get_all_ids_for_all_by_name(value_of_locator)
+        element_locators = [urllib.quote_plus (element) for element in all_ids] #escape xpath id
+    elif lookup_method == "xpath": #find by xpath
+        all_ids = session.locate_with_xpath(value_of_locator)
+        element_locators = [urllib.quote_plus (element) for element in all_ids] #escape xpath id
+    return {"sessionId": session_id,
+            "status": Success if len(element_locators) > 0 else NoSuchElement,
+            "value": [{"ELEMENT": locator} for locator in element_locators]}
 
 @post('/wd/hub/session/<session_id:int>/element')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/element
 def find_element(session_id):
@@ -98,12 +103,17 @@ def find_element(session_id):
     is_present = False
     if lookup_method == "id": # find element by id
         is_present = session.is_id_present(value_of_locator)
-        value_of_locator = urllib.quote_plus (value_of_locator) #escape xpath id
+        value_of_locator = urllib.quote_plus (value_of_locator)
     elif lookup_method == "name": #find by name
-        all_ids = session._get_all_ids_for_all_by_name(value_of_locator)
+        all_ids = session.get_all_ids_for_all_by_name(value_of_locator)
         if len(all_ids)>0 :
             is_present = True
             value_of_locator = urllib.quote_plus (all_ids[0]) #escape xpath id
+    elif lookup_method == "xpath": #find by xpath
+        all_ids = session.locate_with_xpath(value_of_locator)
+        if len(all_ids)>0 :
+            is_present = True
+            value_of_locator = urllib.quote_plus (all_ids[0])
     return {"sessionId": session_id,
             "status": Success if is_present else NoSuchElement,
             "value": {"ELEMENT": "%s" % value_of_locator if is_present else None}}
@@ -112,7 +122,7 @@ def find_element(session_id):
 def element_is_displayed(session_id, element_id):
     session = _web_driver_engine.get_session(session_id)
     element_id = urllib.unquote_plus(element_id) #just in case it is an "escaped xpath id" by us
-    elements = session._get_all_by_id(element_id)
+    elements = session.get_all_by_id(element_id)
     is_displayed = session.is_element_displayed(elements[0]) if len(elements)>0 else False
     return {"sessionId": session_id,
             "status": Success,
@@ -122,7 +132,7 @@ def element_is_displayed(session_id, element_id):
 def element_is_enabled(session_id, element_id):
     session = _web_driver_engine.get_session(session_id)
     element_id = urllib.unquote_plus(element_id) #just in case it is an "escaped xpath id" by us
-    elements = session._get_all_by_id(element_id)
+    elements = session.get_all_by_id(element_id)
     is_enabled = session.is_element_enabled(elements[0]) if len(elements)>0 else False
     return {"sessionId": session_id,
             "status": Success,
@@ -142,7 +152,7 @@ def click_element(session_id, element_id):
 def get_element_tag_name(session_id, element_id):
     session = _web_driver_engine.get_session(session_id)
     element_id = urllib.unquote_plus(element_id) #just in case it is an "escaped xpath id" by us
-    elements = session._get_all_by_id(element_id)
+    elements = session.get_all_by_id(element_id)
     element_tag_name = session.get_element_tag_name(elements[0]) if len(elements)>0 else None
     return {"sessionId": session_id,
             "status": Success if element_tag_name is not None else NoSuchElement,
@@ -182,7 +192,7 @@ def select_frame (session_id):
 def find_element_by_name(session_id, element_id):
     session = _web_driver_engine.get_session(session_id)
     element_id = urllib.unquote_plus(element_id) #just in case it is an "escaped xpath id" by us
-    elements = session._get_all_by_id(element_id)
+    elements = session.get_all_by_id(element_id)
     element_attrib_type = session.get_element_attrib_type(elements[0]) if len(elements)>0 else None
     return {"sessionId": session_id,
             "status": Success if element_attrib_type is not None else NoSuchElement,
@@ -193,7 +203,7 @@ def send_keystrokes(session_id, element_id):
     session = _web_driver_engine.get_session(session_id)
     element_id = urllib.unquote_plus(element_id) #just in case it is an "escaped xpath id" by us
     keys_list = request.json and request.json.get("value", None) or None
-    elements = session._get_all_by_id(element_id)
+    elements = session.get_all_by_id(element_id)
     for keys in keys_list:
         session.send_keys(elements[0], keys)
     return {"sessionId": session_id,
