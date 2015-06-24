@@ -19,7 +19,7 @@ class WebDriverEngine:
         session = self._sessions.get (session_id, None)
         if session is not None:
             session.delete()
-        del self._sessions[session_id]
+            del self._sessions[session_id]
 
     def create_new_session(self, required_capabilities, desired_capabilities):
         new_session = Session(required_capabilities, desired_capabilities)
