@@ -95,7 +95,7 @@ class Session:
         cached_ids = self._cache_of_element_ids_by_element_name.get(name_to_get, None)
         if not cached_ids:
             nodes = [widget for widget in self._get_all_nodes_by_name(name_to_get)]
-            cached_ids = [widget.AXIdentifier for widget in nodes]
+            cached_ids = [self.id_of_element(widget) for widget in nodes]
             self._cache_of_element_ids_by_element_name[name_to_get] = cached_ids
         return cached_ids
 
@@ -180,11 +180,18 @@ class Session:
                 current_node = current_node.findFirst(AXRole=part)
         return [current_node] if current_node is not None else []
 
+    def id_of_element (self, element):
+        id = element.AXIdentifier
+        if id is None:
+            return hash(element)
+        else:
+            return id
+
     def locate_with_xpath (self, xpath_expression):
         elements = [element for element in self._locate_nodes_with_xpath(xpath_expression)]
         for element in elements: #cache all IDs which we found by xpath, for speed in subsequent calls - atomac is very slow to find by id recursively
-            self._cache_of_elements_by_id[element.AXIdentifier] = [element] #FIXME: our API is sometimes based on collections
-        return [element.AXIdentifier for element in elements]
+            self._cache_of_elements_by_id[self.id_of_element(element)] = [element] #FIXME: our API is sometimes based on collections
+        return [self.id_of_element(element) for element in elements]
 
     def take_screenshot(self):
         pane = self._get_current_pane()
