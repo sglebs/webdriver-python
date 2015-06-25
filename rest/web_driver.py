@@ -42,14 +42,14 @@ def delete_session_cookie(session_id):
 @get('/wd/hub/session/<session_id:int>/window_handle') # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/window_handle
 def get_current_window_handle(session_id):
     session = _web_driver_engine.get_session(session_id)
-    current_window_handle = session.get_current_window_handle()
-    return {"sessionId": session_id, "status": Success, "value": current_window_handle}
+    current_window_id = session.get_current_window_id()
+    return {"sessionId": session_id, "status": Success, "value": current_window_id}
 
 @get('/wd/hub/session/<session_id:int>/window_handles') # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/window_handles
 def get_current_window_handles(session_id):
     session = _web_driver_engine.get_session(session_id)
-    window_handles = session.get_window_handles()
-    return {"sessionId": session_id, "status": Success, "value": window_handles}
+    window_ids = session.get_window_ids()
+    return {"sessionId": session_id, "status": Success, "value": window_ids}
 
 @post('/wd/hub/session/<session_id:int>/timeouts/async_script')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/timeouts/async_script
 def set_async_script_timeout(session_id):
@@ -224,10 +224,19 @@ def take_screenshot (session_id):
             "value": base_64}
 
 @delete('/wd/hub/session/<session_id:int>/window') # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/window
-def delete_current_window_handle(session_id):
+def close_current_window(session_id):
     session = _web_driver_engine.get_session(session_id)
-    session.close_current_window()
+    session.close_current_window() #FIXME: test if closed ok and return correct result
     return {"sessionId": session_id, "status": Success, "value": True}
+
+@post('/wd/hub/session/<session_id:int>/window') # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/window
+def focus_on_window(session_id):
+    session = _web_driver_engine.get_session(session_id)
+    window_definition = request.json or {}
+    ok_focus_change = session.focus_on_window(window_definition)
+    return {"sessionId": session_id,
+            "status": Success if ok_focus_change else NoSuchWindow}
+
 
 @post('/wd/hub/session/<session_id:int>/element/<element_id>/clear')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/element/:id/clear
 def element_clear(session_id, element_id):

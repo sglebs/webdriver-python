@@ -15,11 +15,12 @@ class Session:
         self._bundle_id = desired_capabilities.get("bundleId", "")
         self._should_launch_app = desired_capabilities.get("shouldLaunch", True) == True
         self._should_terminate_app = desired_capabilities.get("shouldTerminate", True) == True
-        self._current_frame = None
         if self._should_launch_app:
             atomac.launchAppByBundleId(self._bundle_id)
-        time.sleep(1) #FIXME: wait until app up or timeout
+            time.sleep(2) #FIXME: wait until app up or timeout
         self._app = atomac.getAppRefByBundleId(self._bundle_id)
+        self._current_window = None
+        self._update_current_window_to_be_the_first()
         self._cache_of_elements_by_id = {} #FIXME: need to limit the cache and also purge on new windows etc
         self._cache_of_element_ids_by_element_name = {} #FIXME: need to limit the cache and also purge on new windows etc
 
@@ -27,15 +28,21 @@ class Session:
         if self._should_terminate_app:
             atomac.terminateAppByBundleId(self._bundle_id)
 
-    def get_window_handles(self):
-        windows = self._app.windows()
-        return [window.AXIdentifier for window in windows]
+    def _update_current_window_to_be_the_first(self):
+        self._current_window = self._get_first_window()
+        self._current_frame = None
 
-    def get_current_window_handle(self):
-        return self.get_window_handles()[0]
+    def _get_first_window (self):
+        return self._app.findFirst (AXRole="AXWindow")
+
+    def get_window_ids(self):
+        return [self.id_of_element(window) for window in self._app.windows()]
+
+    def get_current_window_id(self):
+        return self.id_of_element(self._get_current_window())
 
     def _get_current_window(self):
-        return self._app.windows()[0]
+        return self._current_window
 
     def get_default_timeout(self):
         return 10000
@@ -56,7 +63,7 @@ class Session:
             return self._get_current_window()
 
     def _get_all_by_id (self, id_to_get):
-        if self._get_current_pane().AXIdentifier == id_to_get:
+        if self.id_of_element(self._get_current_pane()) == id_to_get:
             return [self._get_current_pane()]
         elif "/" in id_to_get: #xpath
             return self._locate_nodes_with_xpath(id_to_get)
@@ -70,9 +77,8 @@ class Session:
             self._cache_of_elements_by_id[id_to_get] = cached
         return cached
 
-
     def _get_first_by_id (self, id_to_get):
-        if self._get_current_pane().AXIdentifier == id_to_get:
+        if self.id_of_element(self._get_current_pane()) == id_to_get:
             return [self._get_current_pane()]
         elif id_to_get.find('/'): #xpath
             return self._locate_nodes_with_xpath(id_to_get)[0]
@@ -86,7 +92,7 @@ class Session:
             return len(self.get_all_by_id(id_to_verify)) > 0
 
     def _get_all_nodes_by_name (self, name_to_get):
-        if name_to_get == None or name_to_get == "#" or self._get_current_pane().AXIdentifier == name_to_get:
+        if name_to_get == None or name_to_get == "#" or self.id_of_element(self._get_current_pane()) == name_to_get:
             return [self._get_current_pane()]
         else:
             return self._get_current_pane().findAllR(AXDescription=name_to_get)
@@ -100,7 +106,7 @@ class Session:
         return cached_ids
 
     def _get_first_by_name (self, name_to_get):
-        if name_to_get == None or self._get_current_pane().AXIdentifier == name_to_get:
+        if name_to_get == None or name_to_get == "#" or self.id_of_element(self._get_current_pane()) == name_to_get:
             return self._get_current_pane()
         else:
             return self._get_current_pane().findFirstR(AXDescription=name_to_get)
@@ -135,19 +141,19 @@ class Session:
             ui_element.AXValue = ui_element.AXValue + keys # FIXME: find a way to sendKeys to the widget. we use a workaround
             return True
         else:
-            return ui_element.sendKeys(keys) #FIXME: in atomac, sendKeys is global, not to the widget :-(
+            return ui_element.sendKeys(keys) #FIXME: in atomac, sendKeys is global, not to the widget, even though it is an instance method :-(
 
     def is_element_displayed(self, ui_element):
         if "AXEnabled" in ui_element.getAttributes():
             return ui_element.AXEnabled == "1"
         else:
-            return True
+            return True #FIXME: find a way in atomac
 
     def is_element_enabled(self, ui_element):
         if "AXEnabled" in ui_element.getAttributes():
             return ui_element.AXEnabled == "1"
         else:
-            return True
+            return True #FIXME: find a way in atomac
 
     def _locate_nodes_with_xpath (self, xpath_expression):
         parts = xpath_expression.split('/')
@@ -183,7 +189,7 @@ class Session:
     def id_of_element (self, element):
         id = element.AXIdentifier
         if id is None:
-            return hash(element)
+            return str(hash(element))
         else:
             return id
 
@@ -199,4 +205,21 @@ class Session:
         return pyscreeze.screenshot(region=rect)
 
     def close_current_window(self):
-        return self._get_current_pane().AXCloseButton.Press()
+        close_button = self._get_current_pane().AXCloseButton
+        if close_button is not None:
+            close_button.Press()
+            self._update_current_window_to_be_the_first()
+        return close_button is not None
+
+    def focus_on_window(self, window_definition):
+        if "id" in window_definition: # find element by id
+            window = self._get_first_by_id(window_definition["id"])
+        elif "name" in window_definition: #find by name
+            window = self._get_first_by_id(window_definition["name"]) #for a window, its NS ID is its name
+        elif "xpath" in window_definition: #find by xpath
+            window = self.locate_with_xpath(window_definition["xpath"])
+        if window is None:
+            return False
+        else:
+            self._current_window = window
+            return True

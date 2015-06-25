@@ -17,5 +17,5 @@ class TestWebDriverEngine (unittest.TestCase):
     def test_it_is_possible_to_get_the_current_window_handle_of_a_session (self):
         engine = WebDriverEngine()
         [session_id, session] = engine.create_new_session({"foo": 5, "bar": 7}, {"fooz": 5, "barz": 7})
-        window_handle = session.get_current_window_handle()
-        self.assertGreater(window_handle, 0, "Window handle is a positive integer")
+        window_id = session.get_current_window_id()
+        self.assertGreater(window_id, 0, "Window handle is a positive integer")
