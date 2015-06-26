@@ -4,5 +4,6 @@ __author__ = 'mqm'
 
 Success=0
 NoSuchElement=7
+InvalidElementState=12
 JavaScriptError=17
 NoSuchWindow=23
