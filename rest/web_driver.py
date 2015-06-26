@@ -200,13 +200,13 @@ def find_element_by_name(session_id, element_id):
             "value": "%s" % element_attrib_type}
 
 @post('/wd/hub/session/<session_id:int>/element/<element_id>/value')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/element/:id/value
-def send_keystrokes(session_id, element_id):
+def append_keys_to_element(session_id, element_id):
     session = _web_driver_engine.get_session(session_id)
     element_id = urllib.unquote_plus(element_id) #just in case it is an "escaped xpath id" by us
     keys_list = request.json and request.json.get("value", None) or None
     elements = session.get_all_by_id(element_id)
     for keys in keys_list:
-        session.send_keys(elements[0], keys)
+        session.append_text(elements[0], keys)
     return {"sessionId": session_id,
             "status": Success if len(elements)>0 else NoSuchElement,
             "value": True}
@@ -275,3 +275,10 @@ def window_url(session_id):
     current_window_id = session.get_current_window_id()
     return {"sessionId": session_id, "status": Success if current_window_id is not None else InvalidElementState, "value": urllib.quote_plus (current_window_id)}
 
+@post('/wd/hub/session/<session_id:int>/element/active')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/element/active
+def get_active_element(session_id):
+    session = _web_driver_engine.get_session(session_id)
+    active_element_id = session.get_active_element_id()
+    return {"sessionId": session_id,
+            "status": Success if active_element_id is not None else InvalidElementState,
+            "value": {"ELEMENT": urllib.quote_plus(active_element_id)}}

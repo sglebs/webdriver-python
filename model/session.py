@@ -20,6 +20,7 @@ class Session:
             time.sleep(2) #FIXME: wait until app up or timeout
         self._app = atomac.getAppRefByBundleId(self._bundle_id)
         self._current_window = None
+        self._active_element = None
         self._update_current_window_to_be_the_first()
         self._cache_of_elements_by_id = {} #FIXME: need to limit the cache and also purge on new windows etc
         self._cache_of_element_ids_by_element_name = {} #FIXME: need to limit the cache and also purge on new windows etc
@@ -28,9 +29,10 @@ class Session:
         if self._should_terminate_app:
             atomac.terminateAppByBundleId(self._bundle_id)
 
-    def _set_current_window (self, window):
+    def _set_current_window(self, window):
         self._current_window = window
         self._current_frame = None
+        self._active_element = window #FIXME. By default we make the focus go to the window. No atomac API to get element with focus
 
     def _update_current_window_to_be_the_first(self):
         self._set_current_window(self._get_first_window())
@@ -135,6 +137,7 @@ class Session:
         if len(elements) == 0:
             return False
         elements[0].Press()
+        self._active_element = elements[0]
         return True
 
     def get_element_tag_name (self, ui_element):
@@ -148,12 +151,22 @@ class Session:
             ui_element.AXValue = ''
         return True
 
+    def append_text(self, ui_element, text):
+        new_text = self._adjust_keys(text)
+        self._active_element = ui_element
+        # if ui_element.AXRole == "AXTextField" and ui_element.AXValue is not None:
+        #     ui_element.AXValue = ui_element.AXValue + new_text # FIXME: find a way to sendKeys to the widget. we use a workaround of slamming its value
+        #     return True
+        # else:
+        return ui_element.sendKeys(new_text) #FIXME: in atomac, sendKeys is global, not to the widget, even though it is an instance method :-(
+
+    def _adjust_keys(self, keys):
+        new_keys = keys.replace(u"\uE004", "\t").replace(u"\uE006", "\n") #atomac expects \t, \n to replace with MacOS values
+        return new_keys
+
     def send_keys(self, ui_element, keys):
-        if ui_element.AXRole == "AXTextField" and ui_element.AXValue is not None:
-            ui_element.AXValue = ui_element.AXValue + keys # FIXME: find a way to sendKeys to the widget. we use a workaround of slamming its value
-            return True
-        else:
-            return ui_element.sendKeys(keys) #FIXME: in atomac, sendKeys is global, not to the widget, even though it is an instance method :-(
+        new_keys = self._adjust_keys(keys)
+        return ui_element.sendKeys(new_keys) #FIXME: in atomac, sendKeys is global, not to the widget, even though it is an instance method :-(
 
     def is_element_displayed(self, ui_element):
         if "AXEnabled" in ui_element.getAttributes():
@@ -244,3 +257,6 @@ class Session:
         else:
             self._set_current_window(windows[0])
             return True
+
+    def get_active_element_id(self):
+        return self.id_of_element(self._active_element)
