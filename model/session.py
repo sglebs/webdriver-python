@@ -28,9 +28,12 @@ class Session:
         if self._should_terminate_app:
             atomac.terminateAppByBundleId(self._bundle_id)
 
-    def _update_current_window_to_be_the_first(self):
-        self._current_window = self._get_first_window()
+    def _set_current_window (self, window):
+        self._current_window = window
         self._current_frame = None
+
+    def _update_current_window_to_be_the_first(self):
+        self._set_current_window(self._get_first_window())
 
     def _get_first_window (self):
         return self._app.findFirst (AXRole="AXWindow")
@@ -81,7 +84,11 @@ class Session:
         if self.id_of_element(self._get_current_pane()) == id_to_get:
             return [self._get_current_pane()]
         elif id_to_get.find('/'): #xpath
-            return self._locate_nodes_with_xpath(id_to_get)[0]
+            all_found =  self._locate_nodes_with_xpath(id_to_get)
+            if len(all_found) == 0:
+                return None
+            else:
+                return all_found[0]
         else:
             return self._get_current_pane().findFirstR(AXIdentifier=id_to_get)
 
@@ -136,9 +143,14 @@ class Session:
     def get_element_attrib_type(self, ui_element):
         return ui_element.AXRoleDescription
 
-    def send_keys(self, ui_element, keys):
+    def clear_element(self, ui_element):
         if ui_element.AXRole == "AXTextField":
-            ui_element.AXValue = ui_element.AXValue + keys # FIXME: find a way to sendKeys to the widget. we use a workaround
+            ui_element.AXValue = ''
+        return True
+
+    def send_keys(self, ui_element, keys):
+        if ui_element.AXRole == "AXTextField" and ui_element.AXValue is not None:
+            ui_element.AXValue = ui_element.AXValue + keys # FIXME: find a way to sendKeys to the widget. we use a workaround of slamming its value
             return True
         else:
             return ui_element.sendKeys(keys) #FIXME: in atomac, sendKeys is global, not to the widget, even though it is an instance method :-(
@@ -164,8 +176,8 @@ class Session:
             if part == "":
                 current_node = self._app #topmost root if xpath starts with /
                 continue
-            search_result_like_array = re.search('(\w+)[[]?(\d+)[]]?', part)
-            search_result_like_property= re.search('(\w+)[[]?(\w+)=([^]]+)[]]?', part)
+            search_result_like_array = re.search('(\w+)[[](\d+)[]]', part)
+            search_result_like_property= re.search('(\w+)[[](\w+)=([^]]+)[]]', part)
             if search_result_like_array is not None:
                 role = search_result_like_array.group(1)
                 index = int(search_result_like_array.group(2))
@@ -187,6 +199,8 @@ class Session:
         return [current_node] if current_node is not None else []
 
     def id_of_element (self, element):
+        if element is None:
+            return None
         id = element.AXIdentifier
         if id is None:
             return str(hash(element))
@@ -200,26 +214,33 @@ class Session:
         return [self.id_of_element(element) for element in elements]
 
     def take_screenshot(self):
-        pane = self._get_current_pane()
-        rect = [pane.AXPosition[0], pane.AXPosition[1], pane.AXSize[0], pane.AXSize[1]]
+        current_pane = self._get_current_pane()
+        if current_pane is None:
+            return None
+        rect = [current_pane.AXPosition[0], current_pane.AXPosition[1], current_pane.AXSize[0], current_pane.AXSize[1]]
         return pyscreeze.screenshot(region=rect)
 
     def close_current_window(self):
-        close_button = self._get_current_pane().AXCloseButton
+        current_pane = self._get_current_pane()
+        if current_pane is None:
+            return False
+        close_button = current_pane.AXCloseButton
         if close_button is not None:
             close_button.Press()
             self._update_current_window_to_be_the_first()
         return close_button is not None
 
-    def focus_on_window(self, window_definition):
-        if "id" in window_definition: # find element by id
-            window = self._get_first_by_id(window_definition["id"])
-        elif "name" in window_definition: #find by name
-            window = self._get_first_by_id(window_definition["name"]) #for a window, its NS ID is its name
-        elif "xpath" in window_definition: #find by xpath
-            window = self.locate_with_xpath(window_definition["xpath"])
-        if window is None:
+    def get_current_window_title(self):
+        current_pane = self._get_current_pane()
+        if current_pane is None:
+            return None
+        else:
+            return current_pane.AXTitle
+
+    def focus_on_window(self, window_locator):
+        windows = [window for window in self._app.windows() if window.AXIdentifier == window_locator]
+        if windows is None:
             return False
         else:
-            self._current_window = window
+            self._set_current_window(windows[0])
             return True

@@ -43,13 +43,14 @@ def delete_session_cookie(session_id):
 def get_current_window_handle(session_id):
     session = _web_driver_engine.get_session(session_id)
     current_window_id = session.get_current_window_id()
-    return {"sessionId": session_id, "status": Success, "value": current_window_id}
+    return {"sessionId": session_id, "status": Success if current_window_id is not None else InvalidElementState, "value": urllib.quote_plus (current_window_id)}
 
 @get('/wd/hub/session/<session_id:int>/window_handles') # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/window_handles
 def get_current_window_handles(session_id):
     session = _web_driver_engine.get_session(session_id)
     window_ids = session.get_window_ids()
-    return {"sessionId": session_id, "status": Success, "value": window_ids}
+    window_ids_encoded = [urllib.quote_plus (id) for id in window_ids]
+    return {"sessionId": session_id, "status": Success, "value": window_ids_encoded}
 
 @post('/wd/hub/session/<session_id:int>/timeouts/async_script')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/timeouts/async_script
 def set_async_script_timeout(session_id):
@@ -214,11 +215,14 @@ def send_keystrokes(session_id, element_id):
 def take_screenshot (session_id):
     session = _web_driver_engine.get_session(session_id)
     screenshot = session.take_screenshot()
-    screenshot.load() # otherwise, lazy and no bytes in memory, broken img
-    buffer_in_memory = StringIO()
-    screenshot.save(buffer_in_memory, 'PNG')
-    buffer_in_memory.seek(0)
-    base_64 = b64encode(buffer_in_memory.getvalue())
+    base_64 = None
+    if screenshot is not None:
+        #screenshot.save("last_screenshot_returned.png", "PNG") #debug
+        screenshot.load() # otherwise, lazy and no bytes in memory, broken img
+        buffer_in_memory = StringIO()
+        screenshot.save(buffer_in_memory, 'PNG')
+        buffer_in_memory.seek(0)
+        base_64 = b64encode(buffer_in_memory.getvalue())
     return {"sessionId": session_id,
             "status": Success if base_64 else NoSuchWindow,
             "value": base_64}
@@ -226,14 +230,21 @@ def take_screenshot (session_id):
 @delete('/wd/hub/session/<session_id:int>/window') # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/window
 def close_current_window(session_id):
     session = _web_driver_engine.get_session(session_id)
-    session.close_current_window() #FIXME: test if closed ok and return correct result
-    return {"sessionId": session_id, "status": Success, "value": True}
+    closed = session.close_current_window() #FIXME: test if closed ok and return correct result
+    return {"sessionId": session_id, "status": Success if closed else NoSuchWindow, "value": closed}
 
 @post('/wd/hub/session/<session_id:int>/window') # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/window
 def focus_on_window(session_id):
     session = _web_driver_engine.get_session(session_id)
     window_definition = request.json or {}
-    ok_focus_change = session.focus_on_window(window_definition)
+    def_value = None
+    ok_focus_change = False
+    if "id" in window_definition: # find element by id
+        def_value = window_definition["id"]
+    elif "name" in window_definition: #find by name
+        def_value = window_definition["name"]
+    if def_value is not None:
+        ok_focus_change = session.focus_on_window(urllib.unquote_plus(def_value))
     return {"sessionId": session_id,
             "status": Success if ok_focus_change else NoSuchWindow}
 
@@ -243,7 +254,24 @@ def element_clear(session_id, element_id):
     session = _web_driver_engine.get_session(session_id)
     element_id = urllib.unquote_plus(element_id) #just in case it is an "escaped xpath id" by us
     elements = session.get_all_by_id(element_id)
-    #FIXME: erase element' text
+    cleared = False
+    if len(elements)>0:
+        cleared = session.clear_element(elements[0])
     return {"sessionId": session_id,
-            "status": Success,
-            "value": True}
+            "status": Success if cleared else InvalidElementState,
+            "value": cleared}
+
+@get('/wd/hub/session/<session_id:int>/title')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/title
+def window_title(session_id):
+    session = _web_driver_engine.get_session(session_id)
+    window_title = session.get_current_window_title()
+    return {"sessionId": session_id,
+            "status": Success if window_title is not None else InvalidElementState,
+            "value": window_title}
+
+@get('/wd/hub/session/<session_id:int>/url')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/url
+def window_url(session_id):
+    session = _web_driver_engine.get_session(session_id)
+    current_window_id = session.get_current_window_id()
+    return {"sessionId": session_id, "status": Success if current_window_id is not None else InvalidElementState, "value": urllib.quote_plus (current_window_id)}
+
