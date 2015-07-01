@@ -234,7 +234,7 @@ def close_current_window(session_id):
     return {"sessionId": session_id, "status": Success if closed else NoSuchWindow, "value": closed}
 
 @post('/wd/hub/session/<session_id:int>/window') # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/window
-def focus_on_window(session_id):
+def select_window(session_id):
     session = _web_driver_engine.get_session(session_id)
     window_definition = request.json or {}
     def_value = None
