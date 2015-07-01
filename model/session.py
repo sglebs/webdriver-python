@@ -70,8 +70,8 @@ class Session:
     def _get_all_by_id (self, id_to_get):
         if self.id_of_element(self._get_current_pane()) == id_to_get:
             return [self._get_current_pane()]
-        elif "/" in id_to_get: #xpath
-            return self._locate_nodes_with_xpath(id_to_get)
+        elif "/" in id_to_get or "[" in id_to_get: #xpath
+            return self._locate_elements_with_xpath(id_to_get)
         else:
             return self._get_current_pane().findAllR(AXIdentifier=id_to_get)
 
@@ -86,7 +86,7 @@ class Session:
         if self.id_of_element(self._get_current_pane()) == id_to_get:
             return [self._get_current_pane()]
         elif id_to_get.find('/'): #xpath
-            all_found =  self._locate_nodes_with_xpath(id_to_get)
+            all_found = self._locate_elements_with_xpath(id_to_get)
             if len(all_found) == 0:
                 return None
             else:
@@ -96,11 +96,11 @@ class Session:
 
     def is_id_present(self, id_to_verify):
         if "/" in id_to_verify:
-            return len(self._locate_nodes_with_xpath(id_to_verify)) > 0
+            return len(self._locate_elements_with_xpath(id_to_verify)) > 0
         else:
             return len(self.get_all_by_id(id_to_verify)) > 0
 
-    def _get_all_nodes_by_name (self, name_to_get):
+    def _get_all_elements_by_name (self, name_to_get):
         if name_to_get == None or name_to_get == "#" or self.id_of_element(self._get_current_pane()) == name_to_get:
             return [self._get_current_pane()]
         else:
@@ -109,8 +109,8 @@ class Session:
     def get_all_ids_for_all_by_name (self, name_to_get):
         cached_ids = self._cache_of_element_ids_by_element_name.get(name_to_get, None)
         if not cached_ids:
-            nodes = [widget for widget in self._get_all_nodes_by_name(name_to_get)]
-            cached_ids = [self.id_of_element(widget) for widget in nodes]
+            elements = [element for element in self._get_all_elements_by_name(name_to_get)]
+            cached_ids = [self.id_of_element(element) for element in elements]
             self._cache_of_element_ids_by_element_name[name_to_get] = cached_ids
         return cached_ids
 
@@ -121,7 +121,7 @@ class Session:
             return self._get_current_pane().findFirstR(AXDescription=name_to_get)
 
     def is_name_present(self, name_to_verify):
-        return len(self._get_all_nodes_by_name(name_to_verify)) > 0
+        return len(self._get_all_elements_by_name(name_to_verify)) > 0
 
     def select_frame_by_id(self, id_to_verify):
         sheets = [sheet for sheet in self._get_current_window().sheets() if sheet.AXIdentifier == id_to_verify]
@@ -180,36 +180,36 @@ class Session:
         else:
             return True #FIXME: find a way in atomac
 
-    def _locate_nodes_with_xpath (self, xpath_expression):
+    def _locate_elements_with_xpath (self, xpath_expression):
         parts = xpath_expression.split('/')
-        current_node = self._get_current_pane()
+        current_element = self._get_current_pane()
         for part in parts:
-            if current_node is None:
+            if current_element is None:
                 break
             if part == "":
-                current_node = self._app #topmost root if xpath starts with /
+                current_element = self._app #topmost root if xpath starts with /
                 continue
             search_result_like_array = re.search('(\w+)[[](\d+)[]]', part)
             search_result_like_property= re.search('(\w+)[[](\w+)=([^]]+)[]]', part)
             if search_result_like_array is not None:
                 role = search_result_like_array.group(1)
                 index = int(search_result_like_array.group(2))
-                current_node = current_node.findAll(AXRole=role)[index-1]
+                current_element = current_element.findAll(AXRole=role)[index-1]
             elif search_result_like_property is not None:
                 role = search_result_like_property.group(1)
                 prop_name = search_result_like_property.group(2)
                 prop_value = search_result_like_property.group(3)
                 if prop_name == "name":
-                    current_node = current_node.findFirst(AXRole=role, AXDescription=prop_value)
+                    current_element = current_element.findFirst(AXRole=role, AXDescription=prop_value)
                 elif prop_name == "id":
-                    current_node = current_node.findFirst(AXRole=role, AXIdentifier=prop_value)
+                    current_element = current_element.findFirst(AXRole=role, AXIdentifier=prop_value)
                 elif prop_name == "title":
-                    current_node = current_node.findFirst(AXRole=role, AXTitle=prop_value)
+                    current_element = current_element.findFirst(AXRole=role, AXTitle=prop_value)
                 else:
-                    current_node = current_node.findFirst(AXRole=part)
+                    current_element = current_element.findFirst(AXRole=part)
             else:
-                current_node = current_node.findFirst(AXRole=part)
-        return [current_node] if current_node is not None else []
+                current_element = current_element.findFirst(AXRole=part)
+        return [current_element] if current_element is not None else []
 
     def id_of_element (self, element):
         if element is None:
@@ -221,7 +221,7 @@ class Session:
             return id
 
     def locate_with_xpath (self, xpath_expression):
-        elements = [element for element in self._locate_nodes_with_xpath(xpath_expression)]
+        elements = [element for element in self._locate_elements_with_xpath(xpath_expression)]
         for element in elements: #cache all IDs which we found by xpath, for speed in subsequent calls - atomac is very slow to find by id recursively
             self._cache_of_elements_by_id[self.id_of_element(element)] = [element] #FIXME: our API is sometimes based on collections
         return [self.id_of_element(element) for element in elements]
