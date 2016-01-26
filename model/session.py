@@ -47,6 +47,8 @@ class Session:
         return self.id_of_element(self._get_current_window())
 
     def _get_current_window(self):
+        if len(self._app.windows()) == 0:
+            self._current_window = None # FIXME: the correct approach is to hook a listener on window close and nil the inst var below
         return self._current_window
 
     def get_default_timeout(self):
@@ -68,12 +70,18 @@ class Session:
             return self._get_current_window()
 
     def _get_all_by_id (self, id_to_get):
+        if self._get_current_pane() is None:
+            return []
         if self.id_of_element(self._get_current_pane()) == id_to_get:
             return [self._get_current_pane()]
         elif "/" in id_to_get or "[" in id_to_get: #xpath
             return self._locate_elements_with_xpath(id_to_get)
         else:
-            return self._get_current_pane().findAllR(AXIdentifier=id_to_get)
+            first = self._get_current_pane().findFirstR(AXIdentifier=id_to_get) #findFIrst because there can be only 1 with a given ID (unique)
+            if first is None:
+                return []
+            else:
+                return [first]
 
     def get_all_by_id (self, id_to_get):
         cached = self._cache_of_elements_by_id.get(id_to_get, None)

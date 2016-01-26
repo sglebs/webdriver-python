@@ -1,0 +1,20 @@
+!define TEST_SYSTEM {slim}
+
+!define PROTOCOL {http}
+!define url {${PROTOCOL}://localhost:4444/wd/hub}
+
+
+!***> classpath config
+!path ${java.class.path}
+***!
+
+!| selenium |
+| start browser | ${url} | with | bundleId="com.apple.calculator" |
+| click | id=_NS:98 |
+| click | id=_NS:98 |
+| click | id=_NS:719 |
+| click | id=_NS:98 |
+| click | id=_NS:698 |
+| quit browser |
+
+

@@ -1,0 +1,26 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'application'
+
+repositories {
+	mavenLocal()
+    mavenCentral()
+}
+
+
+mainClassName = 'fitnesseMain.FitNesseMain'
+applicationDefaultJvmArgs = [
+  '-Duser.language=pt',
+  '-Duser.country=BR',
+  '-Duser.timezone=America/Sao_Paulo'
+]
+
+
+
+dependencies {
+    compile 'com.github.andreptb:fitnesse-selenium-slim:0.10.0'
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.4'
+}
