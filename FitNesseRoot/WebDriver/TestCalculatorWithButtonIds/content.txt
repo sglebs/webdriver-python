@@ -15,6 +15,7 @@
 | click | id=_NS:719 |
 | click | id=_NS:98 |
 | click | id=_NS:698 |
+| show	| screenshot |
 | quit browser |
 
 
