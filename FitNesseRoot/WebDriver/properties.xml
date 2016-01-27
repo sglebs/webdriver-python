@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <properties>
 <Edit/>
 <Files/>
@@ -6,6 +6,7 @@
 <RecentChanges/>
 <Refactor/>
 <Search/>
+<Suite/>
 <Versions/>
 <WhereUsed/>
 </properties>
