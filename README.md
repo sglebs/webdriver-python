@@ -35,4 +35,4 @@ then run a test from FitNesse: http://localhost:7070/WebDriver
 
 You should see test results like this:
 
-[FitNesse - Calculator](fitnesse.png)
+![FitNesse - Calculator](fitnesse.png)
