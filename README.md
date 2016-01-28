@@ -23,10 +23,13 @@ Now you can use this server as a Remote Web Driver for your apps.
 
 ##### FitNesse with Tests
 Build first:
+
 ```
 ./gradlew installDist
 ```
+
 then run a FitNesse server:
+
 ```
 ./build/install/webdriver-python/bin/webdriver-python -p 7070
 ```
@@ -36,3 +39,11 @@ then run a test from FitNesse: http://localhost:7070/WebDriver
 You should see test results like this:
 
 ![FitNesse - Calculator](fitnesse.png)
+
+
+#### Thank you!
+
+Special thanks to [Softplan](http://www.softplan.con.br) for sponsoring this project/experiment. In particular, the people below:
+  
+  * Anderson Soffa for the support.
+  * André Albino Pereira for the [FitNesse Selenium slim fixture](https://github.com/andreptb/fitnesse-selenium-slim)
