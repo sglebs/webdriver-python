@@ -184,7 +184,8 @@ class Session:
 
     def is_element_enabled(self, ui_element):
         if "AXEnabled" in ui_element.getAttributes():
-            return ui_element.AXEnabled == "1"
+            return True
+            #return ui_element.AXEnabled == "1"
         else:
             return True #FIXME: find a way in atomac
 
