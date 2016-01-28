@@ -21,14 +21,14 @@ client in Selenium to drive MacOS Desktop apps (say the Calculator).
 You should be able to see something like this: {"time": "2015-05-07T12:21:30.208824"}
 Now you can use this server as a Remote Web Driver for your apps.
 
-##### FitNesse with Tests
+##### Testing with FitNesse
 Build first:
 
 ```
 ./gradlew installDist
 ```
 
-then run a FitNesse server:
+then run a FitNesse server (with the webdriver already running, per steps above):
 
 ```
 ./build/install/webdriver-python/bin/webdriver-python -p 7070
@@ -39,6 +39,25 @@ then run a test from FitNesse: http://localhost:7070/WebDriver
 You should see test results like this:
 
 ![FitNesse - Calculator](fitnesse.png)
+
+##### Testing with RobotFramework
+
+Install first:
+
+```
+pip install robotframework
+pip install robotframework-selenium2library
+```
+
+then run (with the webdriver already running, per steps above):
+
+```
+robot Robot/multiply.robot 
+
+```
+You should see test results like this:
+
+![Robot - Calculator](robot.png)
 
 
 #### Thank you!

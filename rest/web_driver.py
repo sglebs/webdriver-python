@@ -59,6 +59,14 @@ def set_async_script_timeout(session_id):
     session.set_async_script_timeout(timeout)
     return {"sessionId": session_id, "status": Success, "value": timeout}
 
+
+@post('/wd/hub/session/<session_id:int>/timeouts/implicit_wait')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/timeouts/implicit_wait
+def set_implicit_wait(session_id):
+    session = _web_driver_engine.get_session(session_id)
+    implicit_wait = request.json and request.json.get("ms", session.get_default_implicit_wait()) or session.get_default_implicit_wait()
+    session.set_implicit_wait(implicit_wait)
+    return {"sessionId": session_id, "status": Success, "value": implicit_wait}
+
 @post('/wd/hub/session/<session_id:int>/timeouts')  # https://code.google.com/p/selenium/wiki/JsonWireProtocol#/session/:sessionId/timeouts
 def set_timeouts(session_id):
     session = _web_driver_engine.get_session(session_id)

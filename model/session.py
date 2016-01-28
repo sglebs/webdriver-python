@@ -11,6 +11,7 @@ class Session:
         self._required_capabilities = required_capabilities
         self._desired_capabilities = desired_capabilities
         self._async_script_timeout = self.get_default_timeout()
+        self._implicit_wait = self.get_default_implicit_wait()
         self._timeouts = {}
         self._bundle_id = desired_capabilities.get("bundleId", "")
         self._should_launch_app = desired_capabilities.get("shouldLaunch", True) == True
@@ -53,6 +54,12 @@ class Session:
 
     def get_default_timeout(self):
         return 10000
+
+    def get_default_implicit_wait(self):
+        return 100
+
+    def set_implicit_wait(self, new_value):
+        self._implicit_wait = new_value
 
     def set_async_script_timeout(self, timeout):
         self._async_script_timeout = timeout
