@@ -2,13 +2,26 @@ webdriver-python
 ================
 
 This is an experiment to implement a [Selenium Remote WebDriver](https://code.google.com/p/selenium/wiki/JsonWireProtocol) in Python, to enable a remote
-client in Selenium to drive MacOS Desktop apps (say the Calculator).
+client in Selenium to drive MacOS Desktop apps (say the Calculator). 
+
+We use the atomac library for GUI automation.
+
 
 #### Install
 
+
 * git clone <this repo>; cd webdriver-python
-* virtualenv ~/venvs/webdriver-python
-* . ~/venvs/webdriver-python/bin/activate
+* virtualenv env
+* source ./env/bin/activate
+
+In order for atomac to work, you also need to do this (as per http://pythonhosted.org/pyobjc/install.html ):
+
+* xcode-select --install
+* pip install -U pyobjc-core
+* pip install -U pyobjc
+
+Install the requirements:
+
 * pip install -r requirements.txt
 
 
