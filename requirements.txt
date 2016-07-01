@@ -1,26 +1,31 @@
+#GUI automation, MacOS
+atomac==1.1.0
+# for screenshots of tests
+Pillow==3.3.0
+pyscreeze==0.1.0
 # collect coverage of tests:
-coverage==3.7.1
-docutils==0.9.1
-hashlib==20081119
+coverage==4.1
+docutils==0.12
+#hashlib==20081119
 logilab-astng==0.23.1
 logilab-common==0.57.1
 # unit tests:
-nose==1.3.4
+nose==1.3.7
 # to pass nose params in the cmd-line:
-nose-testconfig==0.8
-pinocchio==0.3.1
+nose-testconfig==0.10
+pinocchio==0.4.2
 pycrypto==2.6.1
-pylint==0.25.1
-python-dateutil==1.5
-pytz==2012c
-six==1.8.0
-ssh==1.7.14
+pylint==1.5.6
+python-dateutil==2.5.3
+pytz==2016.4
+six==1.10.0
+ssh==1.8.0
 wsgiref==0.1.2
 yolk==0.4.3
-Werkzeug==0.10.4
-Cython==0.21.1
-gevent==1.0.1
-bottle==0.12.8
+Werkzeug==0.11.10
+#Cython==0.21.1
+gevent==1.1.1
+bottle==0.12.9
 # for rest-testing a bottle app:
 bottle-werkzeug==0.1
 # JS integration
