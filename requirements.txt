@@ -1,5 +1,6 @@
 #GUI automation
 atomac==1.1.0; sys_platform == 'darwin'
+pywinauto; sys_platform == 'windows'
 # for screenshots of tests
 Pillow==2.7.0
 #Pillow==3.3.0 #this version fails, requires jpg
