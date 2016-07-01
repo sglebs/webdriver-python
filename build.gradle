@@ -18,7 +18,7 @@ applicationDefaultJvmArgs = [
 
 
 dependencies {
-    compile 'com.github.andreptb:fitnesse-selenium-slim:0.10.0'
+    compile 'com.github.andreptb:fitnesse-selenium-slim:1.0.2'
 }
 
 task wrapper(type: Wrapper) {
