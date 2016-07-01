@@ -14,13 +14,14 @@ We use the atomac library for GUI automation.
 * virtualenv env
 * source ./env/bin/activate
 
-In order for atomac to work, you also need to do this (as per http://pythonhosted.org/pyobjc/install.html ):
-
+##### If MacOS, Do This
 * xcode-select --install
 * pip install -U pyobjc-core
 * pip install -U pyobjc
 
-Install the requirements:
+##### All
+
+Install the remaining requirements:
 
 * pip install -r requirements.txt
 
