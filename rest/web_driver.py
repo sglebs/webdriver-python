@@ -1,11 +1,14 @@
 #from utils.bottlehelpers import get, post, route, Routeable
 from bottle import get, put, post, delete, route
 from bottle import request
-import execjs
-from error_codes import *
+#import execjs
+from rest.error_codes import *
 import urllib
 from base64 import b64encode
-from StringIO import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 __author__ = 'mqm'
 

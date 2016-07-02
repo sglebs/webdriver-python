@@ -2,7 +2,7 @@ webdriver-python
 ================
 
 This is an experiment to implement a [Selenium Remote WebDriver](https://code.google.com/p/selenium/wiki/JsonWireProtocol) in Python, to enable a remote
-client in Selenium to drive native Desktop apps (say the Calculator). 
+client in Selenium to drive native Desktop apps (say the Calculator).
 
 Under MacOS we use the atomac library.
 
@@ -20,6 +20,7 @@ Under MacOS we use the atomac library.
 * pip install -U pyobjc
 
 ##### Then, if Windows, do this
+* Install VisualStudio 2015 Community (so you can compile native libraries)
 * Install PyWin32: https://sourceforge.net/projects/pywin32/files/pywin32/Build%20219/
 
 ##### Then, do this (all platforms)
@@ -69,7 +70,7 @@ pip install robotframework-selenium2library
 then run (with the webdriver already running, per steps above):
 
 ```
-robot Robot/multiply.robot 
+robot Robot/multiply.robot
 
 ```
 You should see test results like this:
@@ -80,6 +81,6 @@ You should see test results like this:
 #### Thank you!
 
 Special thanks to [Softplan](http://www.softplan.con.br) for sponsoring this project/experiment. In particular, the people below:
-  
+
   * Anderson Soffa for the support.
   * André Albino Pereira for the [FitNesse Selenium slim fixture](https://github.com/andreptb/fitnesse-selenium-slim)

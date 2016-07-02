@@ -1,4 +1,9 @@
-from session import Session
+import sys
+if sys.platform == 'darwin':
+    from model.mac_session import Session
+if sys.platform == 'win32':
+    from model.win_session import Session
+
 import time
 
 __author__ = 'mqm'

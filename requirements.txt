@@ -1,6 +1,6 @@
 #GUI automation
 atomac==1.1.0; sys_platform == 'darwin'
-pywinauto; sys_platform == 'windows'
+pywinauto; sys_platform == 'win32'
 # for screenshots of tests
 Pillow==2.7.0
 #Pillow==3.3.0 #this version fails, requires jpg
@@ -31,4 +31,4 @@ bottle==0.12.9
 # for rest-testing a bottle app:
 bottle-werkzeug==0.1
 # JS integration
-PyExecJS==1.1.0
+#PyExecJS==1.1.0
