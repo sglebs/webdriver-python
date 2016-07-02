@@ -4,7 +4,7 @@ pywinauto; sys_platform == 'win32'
 # for screenshots of tests
 Pillow==2.7.0
 #Pillow==3.3.0 #this version fails, requires jpg
-pyscreeze==0.1.0
+pyscreeze==0.1.8
 # collect coverage of tests:
 coverage==4.1
 docutils==0.12
