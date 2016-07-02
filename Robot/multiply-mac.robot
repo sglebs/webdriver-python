@@ -7,7 +7,7 @@ Resource          resource.robot
 
 *** Test Cases ***
 Correct Multiplication
-    Open App
+    Open App  com.apple.calculator
     click element  name=clear
     click element  name=seven
     click element  name=three

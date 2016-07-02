@@ -71,7 +71,7 @@ pip install robotframework-selenium2library
 then run (with the webdriver already running, per steps above):
 
 ```
-robot Robot/multiply.robot
+robot Robot/multiply-mac.robot
 
 ```
 You should see test results like this:

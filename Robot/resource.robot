@@ -10,8 +10,8 @@ Library           Selenium2Library
 ${WEB_DRIVER_URL}    http://localhost:4444/wd/hub
 ${BROWSER}           firefox
 ${INITIAL URL}       #
-${MACOS_APP}         com.apple.calculator
 
 *** Keywords ***
 Open App
-    Open browser    ${INITIAL URL}     ${BROWSER}     remote_url=${WEB_DRIVER_URL}     desired_capabilities=bundleId:${MACOS_APP}
+        [Arguments]    ${app}
+        Open browser    ${INITIAL URL}     ${BROWSER}     remote_url=${WEB_DRIVER_URL}     desired_capabilities=bundleId:${app}
