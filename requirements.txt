@@ -22,7 +22,7 @@ python-dateutil==2.5.3
 pytz==2016.4
 six==1.10.0
 ssh==1.8.0
-wsgiref==0.1.2
+#wsgiref==0.1.2  # not needed, we are not running gunicorn
 yolk==0.4.3
 Werkzeug==0.11.10
 #Cython==0.21.1
