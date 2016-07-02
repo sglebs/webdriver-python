@@ -14,15 +14,15 @@ Under MacOS we use the atomac library.
 * virtualenv env
 * source ./env/bin/activate
 
-##### If MacOS, Do This
+##### Then, if MacOS, do this
 * xcode-select --install
 * pip install -U pyobjc-core
 * pip install -U pyobjc
 
-##### If Windows, Do This
+##### Then, if Windows, do this
 * Install PyWin32: https://sourceforge.net/projects/pywin32/files/pywin32/Build%20219/
 
-##### All
+##### Then, do this (all platforms)
 
 Install the remaining requirements:
 
