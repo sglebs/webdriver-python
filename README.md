@@ -66,6 +66,7 @@ Install first:
 pip install robotframework
 pip install robotframework-selenium2library
 ```
+(note: selenium2library seems incompatible with Python3: https://github.com/robotframework/Selenium2Library/issues/618)
 
 then run (with the webdriver already running, per steps above):
 
