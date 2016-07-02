@@ -1,6 +1,7 @@
 __author__ = 'mqm'
 
-import pywinauto
+#import pywinauto
+from pywinauto.application import Application
 import time
 import re
 import pyscreeze
@@ -17,9 +18,9 @@ class Session:
         self._should_launch_app = desired_capabilities.get("shouldLaunch", True) == True
         self._should_terminate_app = desired_capabilities.get("shouldTerminate", True) == True
         if self._should_launch_app:
-            atomac.launchAppByBundleId(self._bundle_id)
+            self._app = Application().start(self._bundle_id)
             time.sleep(2) #FIXME: wait until app up or timeout
-        self._app = atomac.getAppRefByBundleId(self._bundle_id)
+        #self._app = atomac.getAppRefByBundleId(self._bundle_id)
         self._current_window = None
         self._active_element = None
         self._update_current_window_to_be_the_first()
@@ -39,10 +40,10 @@ class Session:
         self._set_current_window(self._get_first_window())
 
     def _get_first_window (self):
-        return self._app.findFirst (AXRole="AXWindow")
+        return self._app.top_window_()
 
     def get_window_ids(self):
-        return [self.id_of_element(window) for window in self._app.windows()]
+        return [self.id_of_element(window) for window in self._app.windows_()]
 
     def get_current_window_id(self):
         return self.id_of_element(self._get_current_window())
