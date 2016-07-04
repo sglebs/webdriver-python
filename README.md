@@ -9,6 +9,7 @@ Under MacOS we use the atomac library.
 
 #### Install
 
+##### First do this
 
 * git clone <this repo>; cd webdriver-python
 * virtualenv env
@@ -21,7 +22,6 @@ Under MacOS we use the atomac library.
 
 ##### Then, if Windows, do this
 * Install VisualStudio 2015 Community (so you can compile native libraries)
-* Install PyWin32: https://sourceforge.net/projects/pywin32/files/pywin32/Build%20219/
 
 ##### Then, do this (all platforms)
 
