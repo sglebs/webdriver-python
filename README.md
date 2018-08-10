@@ -4,7 +4,7 @@ webdriver-python
 This is an experiment to implement a [Selenium Remote WebDriver](https://w3c.github.io/webdriver/#list-of-endpoints) in Python, to enable a remote
 client in Selenium to drive native Desktop apps (say the Calculator). 
 
-Under MacOS we use the atomac library.
+Under MacOS we use the [atomac](https://github.com/pyatom/pyatom) library.
 
 
 #### Install
